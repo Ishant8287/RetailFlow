@@ -9,7 +9,7 @@ It combines POS billing, inventory management, khata book, supplier tracking, an
 🔗 Frontend:
 https://retail-flow-xi.vercel.app/
 
-🔗 Backend API:
+🔗 Backend:
 https://retailflow.onrender.com
 
 ## 📸 Screenshots
@@ -100,15 +100,7 @@ Smart caching
 
 
 ## 🏗️ System Architecture
-Frontend (React + Tailwind)
-           │
-           ▼
-Backend (Node + Express)
-           │
- ┌─────────┼─────────┐
- ▼         ▼         ▼
-MongoDB   ImageKit   Groq AI
-Database  CDN        AI Engine
+![System Architecture](screenshots/systemarch.png)
 
 
 ⚙️ Tech Stack
@@ -194,7 +186,7 @@ API rate limiting
 
 Clone the repository
 
-git clone https://github.com/yourusername/retailflow.git
+git clone https://github.com/Ishant8287/RetailFlow
 
 Install dependencies
 
