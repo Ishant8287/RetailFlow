@@ -6,13 +6,8 @@ const customerSchema = new mongoose.Schema(
     name: { type: String, required: true },
     phone: { type: String, required: true },
     address: { type: String, default: "" },
-
     totalUdhaar: { type: Number, default: 0 },
-
-    //Credit limit — 0 means no limit enforced
     creditLimit: { type: Number, default: 0 },
-
-    //For WhatsApp reminder scheduling
     nextReminderDate: { type: Date, default: null },
 
     khataHistory: [
@@ -30,5 +25,9 @@ const customerSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+// Indexes
+customerSchema.index({ shop: 1, createdAt: -1 });
+customerSchema.index({ shop: 1, totalUdhaar: 1, nextReminderDate: 1 }); // For reminders query
 
 export default mongoose.model("Customer", customerSchema);

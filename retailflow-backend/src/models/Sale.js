@@ -17,7 +17,7 @@ const saleSchema = new mongoose.Schema(
           required: true,
         },
         batchId: { type: mongoose.Schema.Types.ObjectId, required: true },
-        name: { type: String, default: "" }, // Stored for historical accuracy
+        name: { type: String, default: "" },
         quantity: { type: Number, required: true },
         sellingPrice: { type: Number, required: true },
         purchasePrice: { type: Number, required: true },
@@ -26,11 +26,7 @@ const saleSchema = new mongoose.Schema(
 
     totalAmount: { type: Number, required: true },
     totalPurchasePrice: { type: Number, required: true },
-
-
     profit: { type: Number, default: 0 },
-
-
     totalTax: { type: Number, default: 0 },
 
     paymentSplit: {
@@ -50,5 +46,9 @@ saleSchema.pre("save", function (next) {
   }
   next();
 });
+
+// Compound indexes — critical for dashboard & filtered queries
+saleSchema.index({ shop: 1, createdAt: -1 });
+saleSchema.index({ shop: 1, customer: 1 });
 
 export default mongoose.model("Sale", saleSchema);

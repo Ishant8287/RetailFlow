@@ -24,7 +24,7 @@ export const getSales = async (req, res) => {
 
     const sales = await Sale.find(query)
       .sort("-createdAt")
-      .limit(limit ? parseInt(limit) : 500);
+      .limit(limit ? parseInt(limit) : 50);
 
     res.status(200).json({ success: true, count: sales.length, data: sales });
   } catch (error) {

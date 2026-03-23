@@ -1,5 +1,4 @@
 import Customer from "../models/Customer.js";
-import Shop from "../models/Shop.js";
 
 export const startReminderCron = () => {
   const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
@@ -9,14 +8,19 @@ export const startReminderCron = () => {
       const today = new Date();
       today.setHours(23, 59, 59, 999);
 
+      // FIX: populate("shop") was doing N+1 — this single query fetches everything
       const customersDue = await Customer.find({
         totalUdhaar: { $gt: 0 },
         nextReminderDate: { $lte: today },
-      }).populate("shop");
+      })
+        .populate("shop", "shopName upiId") // Only fetch the 2 fields you actually use
+        .lean(); // .lean() returns plain objects — much faster than Mongoose documents
 
       console.log(
         `\n⏰ RetailFlow Reminder Cron: ${customersDue.length} reminders due today\n`,
       );
+
+      const bulkUpdates = [];
 
       for (const customer of customersDue) {
         const shop = customer.shop;
@@ -34,10 +38,23 @@ export const startReminderCron = () => {
           `   URL: https://wa.me/91${cleanPhone}?text=${encodeURIComponent(msg)}\n`,
         );
 
-        customer.nextReminderDate = new Date(
-          Date.now() + 3 * 24 * 60 * 60 * 1000,
-        );
-        await customer.save();
+        bulkUpdates.push({
+          updateOne: {
+            filter: { _id: customer._id },
+            update: {
+              $set: {
+                nextReminderDate: new Date(
+                  Date.now() + 3 * 24 * 60 * 60 * 1000,
+                ),
+              },
+            },
+          },
+        });
+      }
+
+      // FIX: Single bulk write instead of one save() per customer in a loop
+      if (bulkUpdates.length > 0) {
+        await Customer.bulkWrite(bulkUpdates);
       }
     } catch (error) {
       console.error("Reminder cron error:", error.message);
