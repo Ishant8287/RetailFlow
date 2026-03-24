@@ -76,8 +76,15 @@ export const getDashboardStats = async (req, res, next) => {
           { $group: { _id: null, total: { $sum: "$amount" } } },
         ]),
 
-        // 5. Recent 100 sales only (for the chart/list on dashboard)
-        Sale.find({ shop: shopId }).sort({ createdAt: -1 }).limit(100).lean(),
+        // 5. FIX: Only fetch 30 sales, only the fields the dashboard actually needs
+        // Do NOT fetch all 100 full documents with nested items arrays
+        Sale.find({ shop: shopId })
+          .sort({ createdAt: -1 })
+          .limit(30)
+          .select(
+            "totalAmount profit paymentSplit createdAt invoiceNumber customer",
+          )
+          .lean(),
       ]);
 
     const todayStats = salesAgg[0]?.today?.[0] || {};
@@ -105,7 +112,7 @@ export const getDashboardStats = async (req, res, next) => {
         totalUdhaar,
         inventoryValue,
         totalSalesCount,
-        sales: recentSales, 
+        sales: recentSales,
       },
     });
   } catch (error) {

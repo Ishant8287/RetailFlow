@@ -95,11 +95,9 @@ export const sendOtp = async (req, res) => {
     shop.otpExpires = Date.now() + 10 * 60 * 1000;
     await shop.save();
 
-    if (
-      contactMethod === "email" &&
-      process.env.EMAIL_USER &&
-      process.env.EMAIL_PASS
-    ) {
+    // FIX: Was guarded by EMAIL_USER/EMAIL_PASS which are never set on Render.
+    // Resend only needs RESEND_API_KEY — always attempt email if contactMethod is email.
+    if (contactMethod === "email") {
       try {
         await sendEmail(
           shop.email,
@@ -282,23 +280,20 @@ export const forgotPassword = async (req, res) => {
     shop.otpExpires = Date.now() + 10 * 60 * 1000;
     await shop.save();
 
-    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-      try {
-        await sendEmail(
-          shop.email,
-          "RetailFlow - Password Reset OTP",
-          otpHtml(
-            rawOtp,
-            "Reset Your Password",
-            "You requested a password reset. Your OTP is:",
-          ),
-        );
-      } catch (emailErr) {
-        console.error(
-          "Reset email failed (OTP in terminal):",
-          emailErr.message,
-        );
-      }
+    // FIX: Same issue as sendOtp — was guarded by EMAIL_USER/EMAIL_PASS.
+    // Always attempt to send via Resend.
+    try {
+      await sendEmail(
+        shop.email,
+        "RetailFlow - Password Reset OTP",
+        otpHtml(
+          rawOtp,
+          "Reset Your Password",
+          "You requested a password reset. Your OTP is:",
+        ),
+      );
+    } catch (emailErr) {
+      console.error("Reset email failed (OTP in terminal):", emailErr.message);
     }
 
     return res
