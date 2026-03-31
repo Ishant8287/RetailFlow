@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useOutletContext } from "react-router-dom";
 import { toast } from "sonner";
+import { Upload, X, ImageIcon } from "lucide-react";
 import API from "../../api/axiosInstance";
 
 const schema = z.object({
@@ -19,8 +20,83 @@ const schema = z.object({
   currency: z.string().optional(),
 });
 
+// Reusable ImageKit upload helper
+const uploadToImageKit = async (file, fileName) => {
+  const authRes = await API.get("/upload/auth");
+  const { token, expire, signature } = authRes.data;
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("fileName", fileName);
+  formData.append("publicKey", import.meta.env.VITE_IMAGEKIT_PUBLIC_KEY);
+  formData.append("token", token);
+  formData.append("expire", expire);
+  formData.append("signature", signature);
+  const res = await fetch("https://upload.imagekit.io/api/v1/files/upload", {
+    method: "POST",
+    body: formData,
+  });
+  const data = await res.json();
+  if (!data.url) throw new Error("Upload failed");
+  return data.url;
+};
+
+// Reusable image upload section component
+const ImageUploadSection = ({
+  label,
+  hint,
+  currentUrl,
+  onUpload,
+  accept = "image/*",
+  uploading,
+}) => (
+  <div>
+    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">
+      {label}
+    </label>
+    <p className="text-xs text-slate-500 mb-3">{hint}</p>
+    <div className="flex items-start gap-4">
+      {/* Preview */}
+      <div className="w-24 h-24 rounded-xl bg-[#09090b] border border-slate-700 flex items-center justify-center overflow-hidden shrink-0">
+        {currentUrl ? (
+          <img
+            src={currentUrl}
+            alt={label}
+            className="w-full h-full object-contain p-1"
+          />
+        ) : (
+          <ImageIcon size={24} className="text-slate-600" />
+        )}
+      </div>
+      {/* Upload button */}
+      <div className="flex flex-col gap-2">
+        <label
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border cursor-pointer transition-all font-bold text-sm ${uploading ? "border-slate-700 text-slate-500 cursor-not-allowed" : "border-indigo-500/40 text-indigo-400 hover:bg-indigo-500/10"}`}
+        >
+          <Upload size={15} />
+          {uploading ? "Uploading..." : `Upload ${label}`}
+          <input
+            type="file"
+            accept={accept}
+            className="hidden"
+            disabled={uploading}
+            onChange={onUpload}
+          />
+        </label>
+        <p className="text-[11px] text-slate-600">PNG, JPG up to 2MB</p>
+        {currentUrl && (
+          <p className="text-[11px] text-emerald-400 font-bold">✓ Uploaded</p>
+        )}
+      </div>
+    </div>
+  </div>
+);
+
 const Settings = () => {
   const { shopProfile, setShopProfile } = useOutletContext();
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingSignature, setUploadingSignature] = useState(false);
+  const [localLogo, setLocalLogo] = useState(null);
+  const [localSignature, setLocalSignature] = useState(null);
 
   const {
     register,
@@ -57,6 +133,8 @@ const Settings = () => {
         businessType: shopProfile.businessType || "Retail",
         currency: shopProfile.currency || "INR",
       });
+      setLocalLogo(shopProfile.logo || null);
+      setLocalSignature(shopProfile.signature || null);
     }
   }, [shopProfile, reset]);
 
@@ -67,6 +145,53 @@ const Settings = () => {
       toast.success("Settings saved!");
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to save settings.");
+    }
+  };
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024)
+      return toast.error("Image must be under 2MB.");
+    setUploadingLogo(true);
+    try {
+      const url = await uploadToImageKit(
+        file,
+        `retailflow_logo_${shopProfile._id}`,
+      );
+      const res = await API.put("/auth/profile", { logo: url });
+      setShopProfile(res.data.data);
+      setLocalLogo(url);
+      toast.success("Shop logo updated! It will appear on invoices.");
+    } catch (err) {
+      toast.error(err.message || "Logo upload failed.");
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  const handleSignatureUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024)
+      return toast.error("File must be under 2MB.");
+    // Validate it's an image
+    if (!file.type.startsWith("image/"))
+      return toast.error("Please upload an image file (PNG recommended).");
+    setUploadingSignature(true);
+    try {
+      const url = await uploadToImageKit(
+        file,
+        `retailflow_signature_${shopProfile._id}`,
+      );
+      const res = await API.put("/auth/profile", { signature: url });
+      setShopProfile(res.data.data);
+      setLocalSignature(url);
+      toast.success("Signature uploaded! It will appear on invoices.");
+    } catch (err) {
+      toast.error(err.message || "Signature upload failed.");
+    } finally {
+      setUploadingSignature(false);
     }
   };
 
@@ -100,6 +225,36 @@ const Settings = () => {
         </p>
       </div>
 
+      {/* === BRAND ASSETS SECTION === */}
+      <div className="bg-[#111113] border border-slate-800 rounded-2xl p-6 space-y-6 mb-6">
+        <div>
+          <h2 className="font-bold text-white text-lg mb-1">Brand Assets</h2>
+          <p className="text-xs text-slate-500">
+            Logo and signature appear on every invoice you generate.
+          </p>
+        </div>
+
+        <ImageUploadSection
+          label="Shop Logo"
+          hint="Shown at the top-left of your invoice. Use a transparent PNG for best results."
+          currentUrl={localLogo}
+          onUpload={handleLogoUpload}
+          uploading={uploadingLogo}
+        />
+
+        <div className="border-t border-slate-800/60 pt-6">
+          <ImageUploadSection
+            label="Signature"
+            hint="Your authorized signature shown at the bottom of invoices. PNG with transparent background recommended."
+            currentUrl={localSignature}
+            onUpload={handleSignatureUpload}
+            uploading={uploadingSignature}
+            accept="image/png,image/jpeg,image/webp"
+          />
+        </div>
+      </div>
+
+      {/* === BUSINESS INFO SECTION === */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="bg-[#111113] border border-slate-800 rounded-2xl p-6 space-y-5">
           <h2 className="font-bold text-white text-lg">Business Information</h2>

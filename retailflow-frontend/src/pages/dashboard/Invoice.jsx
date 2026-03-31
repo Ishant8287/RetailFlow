@@ -14,7 +14,7 @@ const Invoice = () => {
   if (!sale) {
     return (
       <div className="min-h-screen flex items-center justify-center text-slate-500 font-bold bg-[#09090b]">
-        {"Invoice Not Found"}
+        Invoice Not Found
       </div>
     );
   }
@@ -23,10 +23,17 @@ const Invoice = () => {
   const shopPhone = shopProfile.phone || "+91 00000 00000";
   const shopEmail = shopProfile.email || "support@retailflow.com";
   const shopAddress = shopProfile.address || "Business Address Not Configured";
-  const shopLogo = shopProfile.logo || null;
+
+  // Priority: logo (business logo uploaded in settings) > avatar (profile pic) > default "R"
+  const shopLogo = shopProfile.logo || shopProfile.avatar || null;
+
+  // Signature from settings
   const shopSignature = shopProfile.signature || null;
-  const signatoryName = shopProfile.signatoryName || "Authorized Signatory";
-  const designation = shopProfile.designation || "Store Manager";
+  const signatoryName =
+    shopProfile.signatoryName ||
+    shopProfile.ownerName ||
+    "Authorized Signatory";
+  const designation = shopProfile.designation || "Store Owner";
   const upiId = shopProfile.upiId || "";
 
   const upiAmount = Number(sale.paymentSplit?.upi || 0);
@@ -78,7 +85,7 @@ const Invoice = () => {
       doc.setFont(undefined, "bold");
       doc.text(`Grand Total: Rs. ${sale.totalAmount}`, 140, finalY + 20);
       doc.save(`${invoiceNum}.pdf`);
-      toast.success("Professional Invoice Saved!");
+      toast.success("Invoice saved!");
     } catch (_error) {
       toast.error("PDF Generation Failed");
     }
@@ -90,15 +97,17 @@ const Invoice = () => {
         {/* INVOICE HEADER */}
         <div className="p-10 flex flex-col md:flex-row justify-between gap-8 border-b border-slate-100">
           <div className="space-y-4">
+            {/* Shop Logo / Avatar */}
             {shopLogo ? (
               <img
                 src={shopLogo}
                 alt="Business Logo"
-                className="h-16 w-auto grayscale-[0.5] hover:grayscale-0 transition-all"
+                className="h-16 w-auto object-contain"
+                style={{ maxWidth: "200px" }}
               />
             ) : (
-              <div className="w-14 h-14 bg-slate-900 text-white flex items-center justify-center rounded-xl text-2xl font-black">
-                R
+              <div className="w-14 h-14 bg-indigo-600 text-white flex items-center justify-center rounded-xl text-2xl font-black">
+                {shopName.substring(0, 1).toUpperCase()}
               </div>
             )}
             <div>
@@ -106,8 +115,8 @@ const Invoice = () => {
                 {shopName}
               </h2>
               <div className="mt-2 space-y-1 text-slate-500 font-semibold text-xs">
-                {shopProfile.gstEnabled && (
-                  <p className="text-indigo-600">GSTIN: {shopProfile.gst}</p>
+                {shopProfile.gstEnabled && shopProfile.gstin && (
+                  <p className="text-indigo-600">GSTIN: {shopProfile.gstin}</p>
                 )}
                 <p className="flex items-center gap-2">
                   <Phone size={12} /> {shopPhone}
@@ -121,6 +130,7 @@ const Invoice = () => {
               </div>
             </div>
           </div>
+
           <div className="text-right flex flex-col justify-between">
             <div>
               <h1 className="text-6xl font-black text-slate-100/80 leading-none">
@@ -188,6 +198,7 @@ const Invoice = () => {
         {/* SUMMARY & PAYMENTS */}
         <div className="p-10 bg-slate-50/50 border-t border-slate-100 mt-auto">
           <div className="flex flex-col md:flex-row justify-between items-end gap-10">
+            {/* UPI QR Code */}
             <div className="w-full md:w-auto">
               {upiLink && (
                 <div className="flex items-center gap-6 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
@@ -199,38 +210,61 @@ const Invoice = () => {
                       Scan to Pay
                     </p>
                     <p className="text-xs font-bold text-slate-500 max-w-30">
-                      Instant payment for UPI Amount: ₹{upiAmount}
+                      UPI Amount: ₹{upiAmount}
                     </p>
                   </div>
                 </div>
               )}
             </div>
+
+            {/* Totals + Signature */}
             <div className="w-full md:w-72 space-y-4">
               <div className="flex justify-between items-center text-slate-500 font-bold text-sm">
                 <span>Total Items</span>
                 <span>{sale.items.length}</span>
               </div>
+              {sale.paymentSplit?.cash > 0 && (
+                <div className="flex justify-between items-center text-slate-500 font-semibold text-sm">
+                  <span>Cash</span>
+                  <span>₹{sale.paymentSplit.cash}</span>
+                </div>
+              )}
+              {sale.paymentSplit?.upi > 0 && (
+                <div className="flex justify-between items-center text-slate-500 font-semibold text-sm">
+                  <span>UPI</span>
+                  <span>₹{sale.paymentSplit.upi}</span>
+                </div>
+              )}
+              {sale.paymentSplit?.udhaar > 0 && (
+                <div className="flex justify-between items-center text-rose-500 font-semibold text-sm">
+                  <span>Udhaar (Due)</span>
+                  <span>₹{sale.paymentSplit.udhaar}</span>
+                </div>
+              )}
               <div className="flex justify-between items-center py-4 border-y border-slate-200">
                 <span className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">
-                  Amount Due
+                  Grand Total
                 </span>
                 <span className="text-3xl font-black text-slate-900">
                   ₹{sale.totalAmount}
                 </span>
               </div>
-              <div className="pt-6 text-right">
+
+              {/* Signature section */}
+              <div className="pt-4 text-right">
                 <div className="h-16 flex items-end justify-end mb-2">
                   {shopSignature ? (
                     <img
                       src={shopSignature}
-                      className="max-h-16 grayscale brightness-50"
+                      className="max-h-16 max-w-full object-contain"
                       alt="Signature"
+                      style={{ filter: "brightness(0)" }}
                     />
                   ) : (
-                    <div className="w-32 border-b border-dashed border-slate-300"></div>
+                    <div className="w-40 border-b-2 border-dashed border-slate-300" />
                   )}
                 </div>
-                <p className="text-sm font-black text-slate-900 uppercase">
+                <p className="text-sm font-black text-slate-900 uppercase tracking-wide">
                   {signatoryName}
                 </p>
                 <p className="text-[10px] text-slate-400 font-black tracking-widest uppercase">
@@ -239,6 +273,7 @@ const Invoice = () => {
               </div>
             </div>
           </div>
+
           <div className="mt-12 text-center border-t border-slate-100 pt-6">
             <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">
               Generated via RetailFlow • Thank you for your business
@@ -253,13 +288,13 @@ const Invoice = () => {
           onClick={() => window.print()}
           className="bg-[#111113] text-white px-8 py-4 rounded-2xl font-black shadow-2xl hover:bg-black transition-all flex items-center gap-3 active:scale-95"
         >
-          <Printer size={20} /> {"Print Invoice"}
+          <Printer size={20} /> Print Invoice
         </button>
         <button
           onClick={downloadPDF}
           className="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black shadow-[0_10px_30px_rgba(79,70,229,0.4)] hover:bg-indigo-500 transition-all flex items-center gap-3 active:scale-95"
         >
-          <Download size={20} /> {"Save As Pdf"}
+          <Download size={20} /> Save as PDF
         </button>
       </div>
     </div>

@@ -5,109 +5,137 @@ import {
   BarChart3,
   ShieldCheck,
   Smartphone,
+  ArrowRight,
 } from "lucide-react";
+
+const features = [
+  {
+    icon: Zap,
+    title: "Fast Billing",
+    label: "POS",
+    desc: "Bill customers in seconds. Split payments across cash, UPI and udhaar. Generate professional invoices with QR codes.",
+    accent: "#6366f1",
+    bg: "from-indigo-500/10 to-transparent",
+    border: "border-indigo-500/20 hover:border-indigo-500/50",
+  },
+  {
+    icon: BookOpenCheck,
+    title: "Digital Khata",
+    label: "Credit",
+    desc: "Track udhaar digitally. Send WhatsApp payment reminders with UPI links. Set credit limits per customer.",
+    accent: "#f59e0b",
+    bg: "from-amber-500/10 to-transparent",
+    border: "border-amber-500/20 hover:border-amber-500/50",
+  },
+  {
+    icon: PackageSearch,
+    title: "Smart Inventory",
+    label: "Stock",
+    desc: "Know your stock at all times. Get low stock alerts before you run out. Track batches and expiry dates.",
+    accent: "#10b981",
+    bg: "from-emerald-500/10 to-transparent",
+    border: "border-emerald-500/20 hover:border-emerald-500/50",
+  },
+  {
+    icon: BarChart3,
+    title: "Profit Analytics",
+    label: "Reports",
+    desc: "See daily and monthly profit, revenue trends, and top-selling items in one clean dashboard.",
+    accent: "#f43f5e",
+    bg: "from-rose-500/10 to-transparent",
+    border: "border-rose-500/20 hover:border-rose-500/50",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Secure & Encrypted",
+    label: "Security",
+    desc: "Your data is encrypted end-to-end and backed up automatically. Role-based access for staff.",
+    accent: "#0ea5e9",
+    bg: "from-sky-500/10 to-transparent",
+    border: "border-sky-500/20 hover:border-sky-500/50",
+  },
+  {
+    icon: Smartphone,
+    title: "Works on Mobile",
+    label: "Mobile",
+    desc: "Optimized for phones and tablets. Your cashier can use it from any device at the counter.",
+    accent: "#8b5cf6",
+    bg: "from-violet-500/10 to-transparent",
+    border: "border-violet-500/20 hover:border-violet-500/50",
+  },
+];
 
 function Features() {
   return (
-    <section
-      id="features"
-      className="py-24 bg-[#09090b] relative transition-all duration-300"
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-3xl sm:text-5xl font-black text-white mb-6 tracking-tight">
-          Everything You Need to Run{" "}
-          <span className="text-indigo-500">RetailFlow</span>
-        </h2>
+    <section id="features" className="py-24 bg-[#09090b] relative">
+      {/* Subtle top border gradient */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-slate-700 to-transparent" />
 
-        <p className="text-slate-400 max-w-2xl mx-auto mb-16 text-lg font-medium">
-          Powerful tools built for modern businesses — manage stock, billing and
-          customer credit effortlessly without the headache of manual logs.
-        </p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="max-w-2xl mb-16">
+          <p className="text-xs font-black text-indigo-400 uppercase tracking-[0.2em] mb-4">
+            Features
+          </p>
+          <h2 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight mb-4">
+            Everything your shop needs,
+            <br />
+            <span className="text-slate-500">nothing you don't.</span>
+          </h2>
+          <p className="text-slate-400 text-lg font-medium">
+            RetailFlow replaces your notebook, calculator, and spreadsheet —
+            with a system that actually works for Indian retail.
+          </p>
+        </div>
 
-        <div className="grid gap-6 md:gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {/* Feature 1: Smart Inventory */}
-          <FeatureCard
-            icon={<PackageSearch size={28} />}
-            title="Smart Inventory"
-            desc="Track stock levels, detect dead stock, and get low stock warnings automatically before you run out."
-            color="indigo"
-          />
+        {/* Feature grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {features.map((feature) => {
+            const Icon = feature.icon;
+            return (
+              <div
+                key={feature.title}
+                className={`group relative bg-[#111113] border rounded-2xl p-7 transition-all duration-300 overflow-hidden cursor-default ${feature.border}`}
+              >
+                {/* Background gradient on hover */}
+                <div
+                  className={`absolute inset-0 bg-linear-to-br ${feature.bg} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
+                />
 
-          {/* Feature 2: Fast Billing */}
-          <FeatureCard
-            icon={<Zap size={28} />}
-            title="Fast Billing (POS)"
-            desc="Ultra-fast Point of Sale system with split payments (Cash+UPI) and instant dynamic QR code generation."
-            color="emerald"
-          />
+                <div className="relative">
+                  {/* Label + Icon row */}
+                  <div className="flex items-center justify-between mb-5">
+                    <span
+                      className="text-[10px] font-black uppercase tracking-[0.15em] px-2 py-1 rounded-md"
+                      style={{
+                        color: feature.accent,
+                        background: `${feature.accent}18`,
+                      }}
+                    >
+                      {feature.label}
+                    </span>
+                    <div
+                      className="w-9 h-9 rounded-xl flex items-center justify-center"
+                      style={{ background: `${feature.accent}15` }}
+                    >
+                      <Icon size={18} style={{ color: feature.accent }} />
+                    </div>
+                  </div>
 
-          {/* Feature 3: Smart Khata */}
-          <FeatureCard
-            icon={<BookOpenCheck size={28} />}
-            title="Digital Khata"
-            desc="Manage customer credit effortlessly. Send 1-click WhatsApp reminders with direct UPI payment links."
-            color="amber"
-          />
-
-          {/* Feature 4: Real-time Analytics */}
-          <FeatureCard
-            icon={<BarChart3 size={28} />}
-            title="Profit Analytics"
-            desc="Know your daily, weekly, and monthly profit margins with deep-dive visual charts and reports."
-            color="rose"
-          />
-
-          {/* Feature 5: Secure Backup */}
-          <FeatureCard
-            icon={<ShieldCheck size={28} />}
-            title="Secure Cloud Sync"
-            desc="Your data is encrypted and backed up automatically. Never lose your business records again."
-            color="sky"
-          />
-
-          {/* Feature 6: Responsive UI */}
-          <FeatureCard
-            icon={<Smartphone size={28} />}
-            title="Mobile Ready"
-            desc="Optimized for tablets and old mobile browsers. Access your business data from anywhere, anytime."
-            color="violet"
-          />
+                  <h3 className="text-xl font-black text-white mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-sm text-slate-400 leading-relaxed font-medium">
+                    {feature.desc}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
   );
 }
-
-// 🚀 Reusable Component for cleaner code
-const FeatureCard = ({ icon, title, desc, color }) => {
-  const colorMap = {
-    indigo:
-      "bg-indigo-500/10 text-indigo-400 border-indigo-500/20 group-hover:border-indigo-500/50 hover:shadow-indigo-500/10",
-    emerald:
-      "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 group-hover:border-emerald-500/50 hover:shadow-emerald-500/10",
-    amber:
-      "bg-amber-500/10 text-amber-400 border-amber-500/20 group-hover:border-amber-500/50 hover:shadow-amber-500/10",
-    rose: "bg-rose-500/10 text-rose-400 border-rose-500/20 group-hover:border-rose-500/50 hover:shadow-rose-500/10",
-    sky: "bg-sky-500/10 text-sky-400 border-sky-500/20 group-hover:border-sky-500/50 hover:shadow-sky-500/10",
-    violet:
-      "bg-violet-500/10 text-violet-400 border-violet-500/20 group-hover:border-violet-500/50 hover:shadow-violet-500/10",
-  };
-
-  return (
-    <div
-      className={`group p-8 rounded-4xl bg-[#171e2e] border transition-all duration-300 text-left relative overflow-hidden hover:-translate-y-2 ${colorMap[color]}`}
-    >
-      <div
-        className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-inner ${colorMap[color]}`}
-      >
-        {icon}
-      </div>
-      <h3 className="text-xl font-black mb-3 text-white transition-colors">
-        {title}
-      </h3>
-      <p className="text-slate-400 leading-relaxed font-medium">{desc}</p>
-    </div>
-  );
-};
 
 export default Features;
