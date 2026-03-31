@@ -1,6 +1,6 @@
 import Customer from "../models/Customer.js";
 import Sale from "../models/Sale.js";
-
+import { cache } from "../utils/cache.js";
 
 export const addCustomer = async (req, res) => {
   try {
@@ -12,14 +12,15 @@ export const addCustomer = async (req, res) => {
         .json({ success: false, message: "Name and phone are required." });
     }
 
-    const existing = await Customer.findOne({ phone, shop: req.shop.id });
+    const existing = await Customer.findOne({
+      phone,
+      shop: req.shop.id,
+    }).lean();
     if (existing) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Customer with this phone already exists.",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Customer with this phone already exists.",
+      });
     }
 
     const customer = await Customer.create({
@@ -27,23 +28,42 @@ export const addCustomer = async (req, res) => {
       name,
       phone,
       address: address || "",
-      creditLimit: creditLimit || 0, // 0 means no limit
+      creditLimit: creditLimit || 0,
     });
 
-    res
-      .status(201)
-      .json({ success: true, data: customer, message: "Customer added! 👤" });
+    cache.invalidate(`customers:${req.shop.id}`);
+
+    res.status(201).json({
+      success: true,
+      data: customer,
+      message: "Customer added! 👤",
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-
 export const getCustomers = async (req, res) => {
   try {
-    const customers = await Customer.find({ shop: req.shop.id }).sort(
-      "-createdAt",
-    );
+    const key = `customers:${req.shop.id}`;
+    const cached = cache.get(key);
+    if (cached) {
+      return res
+        .status(200)
+        .json({
+          success: true,
+          count: cached.length,
+          data: cached,
+          cached: true,
+        });
+    }
+
+    const customers = await Customer.find({ shop: req.shop.id })
+      .sort("-createdAt")
+      .lean();
+
+    cache.set(key, customers, 60_000); // 60s TTL
+
     res
       .status(200)
       .json({ success: true, count: customers.length, data: customers });
@@ -51,7 +71,6 @@ export const getCustomers = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
 
 export const updateCustomer = async (req, res) => {
   try {
@@ -76,15 +95,12 @@ export const updateCustomer = async (req, res) => {
       paymentNote,
     } = req.body;
 
-    // Handle payment received (updates khata history automatically)
     if (paymentAmount && paymentAmount > 0) {
       if (paymentAmount > customer.totalUdhaar) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "Payment exceeds outstanding due amount.",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "Payment exceeds outstanding due amount.",
+        });
       }
       customer.totalUdhaar -= paymentAmount;
       customer.khataHistory.push({
@@ -94,7 +110,6 @@ export const updateCustomer = async (req, res) => {
       });
     }
 
-    // Handle direct totalUdhaar update (for sync purposes)
     if (totalUdhaar !== undefined && paymentAmount === undefined) {
       customer.totalUdhaar = totalUdhaar;
     }
@@ -106,6 +121,8 @@ export const updateCustomer = async (req, res) => {
 
     await customer.save();
 
+    cache.invalidate(`customers:${req.shop.id}`);
+
     res
       .status(200)
       .json({ success: true, data: customer, message: "Customer updated!" });
@@ -114,13 +131,15 @@ export const updateCustomer = async (req, res) => {
   }
 };
 
-
 export const getCustomerHistory = async (req, res) => {
   try {
-    const customer = await Customer.findOne({
-      _id: req.params.id,
-      shop: req.shop.id,
-    });
+    const [customer, sales] = await Promise.all([
+      Customer.findOne({ _id: req.params.id, shop: req.shop.id }).lean(),
+      Sale.find({ shop: req.shop.id, customer: req.params.id })
+        .sort("-createdAt")
+        .limit(50)
+        .lean(),
+    ]);
 
     if (!customer) {
       return res
@@ -128,15 +147,6 @@ export const getCustomerHistory = async (req, res) => {
         .json({ success: false, message: "Customer not found." });
     }
 
-    // Get all sales linked to this customer
-    const sales = await Sale.find({
-      shop: req.shop.id,
-      customer: req.params.id,
-    })
-      .sort("-createdAt")
-      .limit(50);
-
-    // Build purchase frequency map
     const itemFrequency = {};
     sales.forEach((sale) => {
       sale.items.forEach((item) => {
@@ -172,7 +182,6 @@ export const getCustomerHistory = async (req, res) => {
   }
 };
 
-
 export const scheduleReminder = async (req, res) => {
   try {
     const customer = await Customer.findOne({
@@ -193,6 +202,8 @@ export const scheduleReminder = async (req, res) => {
       : new Date(Date.now() + 24 * 60 * 60 * 1000);
     await customer.save();
 
+    cache.invalidate(`customers:${req.shop.id}`);
+
     res.status(200).json({
       success: true,
       message: "Reminder scheduled!",
@@ -203,7 +214,6 @@ export const scheduleReminder = async (req, res) => {
   }
 };
 
-
 export const getRemindersDue = async (req, res) => {
   try {
     const today = new Date();
@@ -213,7 +223,7 @@ export const getRemindersDue = async (req, res) => {
       shop: req.shop.id,
       totalUdhaar: { $gt: 0 },
       nextReminderDate: { $lte: today },
-    });
+    }).lean();
 
     res
       .status(200)

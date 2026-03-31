@@ -1,8 +1,6 @@
- 
 import { useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { toast } from "sonner";
-import { useTranslation } from "react-i18next";
 import API from "../../api/axiosInstance";
 import {
   Plus,
@@ -15,13 +13,10 @@ import {
   CheckCircle2,
   Clock,
   AlertTriangle,
-  PackageSearch,
 } from "lucide-react";
 
 const Inventory = () => {
-  const { t } = useTranslation();
   const { items = [], setItems, sales = [] } = useOutletContext();
-
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingItemId, setEditingItemId] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
@@ -161,11 +156,11 @@ const Inventory = () => {
         setItems((prev) =>
           prev.map((i) => (i._id === editingItemId ? res.data.data : i)),
         );
-        toast.success("Item updated");
+        toast.success("Item updated successfully");
       } else {
         const res = await API.post("/items", payload);
         setItems((prev) => [...prev, res.data.data]);
-        toast.success("Item added");
+        toast.success("Item added successfully");
       }
       resetForm();
     } catch (error) {
@@ -191,9 +186,7 @@ const Inventory = () => {
     <div className="text-white space-y-6 bg-transparent min-h-dvh pb-24">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-black tracking-tight">
-            {t("inventory")}
-          </h1>
+          <h1 className="text-2xl font-black tracking-tight">Inventory</h1>
           <p className="text-sm text-slate-400 font-medium mt-0.5">
             Manage your products and batches.
           </p>
@@ -201,7 +194,7 @@ const Inventory = () => {
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button
             onClick={() => toast.info("Bulk update coming soon!")}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-[#111827] border border-slate-800 rounded-xl text-sm font-bold shadow-sm hover:bg-slate-800 transition-colors"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-[#111113] border border-slate-800 rounded-xl text-sm font-bold shadow-sm hover:bg-slate-800 transition-colors"
           >
             <UploadCloud size={16} />{" "}
             <span className="hidden sm:inline">Bulk Update</span>
@@ -210,7 +203,7 @@ const Inventory = () => {
             onClick={() => setIsDrawerOpen(true)}
             className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-md shadow-indigo-600/20 active:scale-95 transition-all"
           >
-            <Plus size={18} /> {t("addItem")}
+            <Plus size={18} /> Add Item
           </button>
         </div>
       </div>
@@ -223,17 +216,17 @@ const Inventory = () => {
           />
           <input
             type="text"
-            placeholder={t("searchItems")}
+            placeholder="Search Items"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-[#111827] border border-slate-800 rounded-xl text-sm font-medium focus:outline-none focus:border-indigo-500 transition-colors text-white shadow-sm"
+            className="w-full pl-10 pr-4 py-2.5 bg-[#111113] border border-slate-800 rounded-xl text-sm font-medium focus:outline-none focus:border-indigo-500 transition-colors text-white shadow-sm"
           />
         </div>
         <div className="relative">
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="w-full sm:w-48 appearance-none pl-4 pr-10 py-2.5 bg-[#111827] border border-slate-800 rounded-xl text-sm font-bold text-slate-300 focus:outline-none cursor-pointer"
+            className="w-full sm:w-48 appearance-none pl-4 pr-10 py-2.5 bg-[#111113] border border-slate-800 rounded-xl text-sm font-bold text-slate-300 focus:outline-none cursor-pointer"
           >
             <option value="recent">Recently Added</option>
             <option value="low_stock">Low Stock First</option>
@@ -267,7 +260,7 @@ const Inventory = () => {
           return (
             <div
               key={item._id}
-              className="p-4 sm:p-5 rounded-2xl bg-[#111827] border border-slate-800 shadow-sm flex flex-col justify-between hover:border-indigo-500/50 transition-colors"
+              className="p-4 sm:p-5 rounded-2xl bg-[#111113] border border-slate-800 shadow-sm flex flex-col justify-between hover:border-indigo-500/50 transition-colors"
             >
               <div>
                 <div className="flex justify-between items-start mb-2">
@@ -330,27 +323,27 @@ const Inventory = () => {
             onClick={resetForm}
             className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 transition-opacity"
           />
-          <div className="fixed top-0 right-0 h-dvh w-full sm:w-100 bg-[#0f172a] border-l border-slate-800 p-6 pb-24 z-50 overflow-y-auto shadow-2xl animate-in slide-in-from-right duration-300">
+          <div className="fixed top-0 right-0 h-dvh w-full sm:w-100 bg-[#111113] border-l border-slate-800 p-6 pb-24 z-50 overflow-y-auto shadow-2xl animate-in slide-in-from-right duration-300">
             <h2 className="text-2xl font-black text-white mb-6">
-              {editingItemId ? t("editItem") : t("addItem")}
+              {editingItemId ? "Edit Item" : "Add New Item"}
             </h2>
             <div className="space-y-4">
               <div>
                 <label className="text-xs font-bold text-slate-400 uppercase mb-1 block tracking-wider">
-                  {t("itemName")}
+                  Item Name
                 </label>
                 <input
                   name="name"
                   placeholder="e.g. Maggi"
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full p-3 bg-[#111827] border border-slate-800 rounded-xl text-white outline-none focus:border-indigo-500"
+                  className="w-full p-3 bg-[#111113] border border-slate-800 rounded-xl text-white outline-none focus:border-indigo-500"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">
-                    {t("sellingPrice")}
+                    Selling Price
                   </label>
                   <input
                     name="sellingPrice"
@@ -358,18 +351,18 @@ const Inventory = () => {
                     placeholder="₹ 0"
                     value={formData.sellingPrice}
                     onChange={handleChange}
-                    className="w-full p-3 bg-[#111827] border border-slate-800 rounded-xl text-white outline-none focus:border-indigo-500"
+                    className="w-full p-3 bg-[#111113] border border-slate-800 rounded-xl text-white outline-none focus:border-indigo-500"
                   />
                 </div>
                 <div>
                   <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">
-                    {t("unit")}
+                    Unit Type
                   </label>
                   <select
                     name="unitType"
                     value={formData.unitType}
                     onChange={handleChange}
-                    className="w-full p-3 bg-[#111827] border border-slate-800 rounded-xl text-white outline-none"
+                    className="w-full p-3 bg-[#111113] border border-slate-800 rounded-xl text-white outline-none"
                   >
                     <option value="piece">Piece</option>
                     <option value="kg">Kg</option>
@@ -381,14 +374,14 @@ const Inventory = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">
-                    {t("alertQuantity")}
+                    Alert Quantity
                   </label>
                   <input
                     name="lowStockThreshold"
                     type="number"
                     value={formData.lowStockThreshold}
                     onChange={handleChange}
-                    className="w-full p-3 bg-[#111827] border border-slate-800 rounded-xl text-white outline-none"
+                    className="w-full p-3 bg-[#111113] border border-slate-800 rounded-xl text-white outline-none"
                   />
                 </div>
                 <div>
@@ -399,7 +392,7 @@ const Inventory = () => {
                     name="taxPercent"
                     value={formData.taxPercent}
                     onChange={handleChange}
-                    className="w-full p-3 bg-[#111827] border border-slate-800 rounded-xl text-white outline-none"
+                    className="w-full p-3 bg-[#111113] border border-slate-800 rounded-xl text-white outline-none"
                   >
                     <option value={0}>0%</option>
                     <option value={5}>5%</option>
@@ -418,7 +411,7 @@ const Inventory = () => {
                   placeholder="Optional"
                   value={formData.hsn}
                   onChange={handleChange}
-                  className="w-full p-3 bg-[#111827] border border-slate-800 rounded-xl text-white outline-none"
+                  className="w-full p-3 bg-[#111113] border border-slate-800 rounded-xl text-white outline-none"
                 />
               </div>
               <div className="border-t border-slate-800 pt-4 mt-2">
@@ -428,7 +421,7 @@ const Inventory = () => {
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">
-                      {t("purchasePrice")}
+                      Purchase Price
                     </label>
                     <input
                       name="batchCostPrice"
@@ -436,12 +429,12 @@ const Inventory = () => {
                       placeholder="₹ 0"
                       value={formData.batchCostPrice}
                       onChange={handleChange}
-                      className="w-full p-3 bg-[#111827] border border-slate-800 rounded-xl text-white outline-none"
+                      className="w-full p-3 bg-[#111113] border border-slate-800 rounded-xl text-white outline-none"
                     />
                   </div>
                   <div>
                     <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">
-                      {t("quantity")}
+                      Current Quantity
                     </label>
                     <input
                       name="batchQuantity"
@@ -449,20 +442,20 @@ const Inventory = () => {
                       placeholder="0"
                       value={formData.batchQuantity}
                       onChange={handleChange}
-                      className="w-full p-3 bg-[#111827] border border-slate-800 rounded-xl text-white outline-none"
+                      className="w-full p-3 bg-[#111113] border border-slate-800 rounded-xl text-white outline-none"
                     />
                   </div>
                 </div>
                 <div>
                   <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">
-                    {t("expiry")}
+                    Expiry Date
                   </label>
                   <input
                     name="batchExpiryDate"
                     type="date"
                     value={formData.batchExpiryDate}
                     onChange={handleChange}
-                    className="w-full p-3 bg-[#111827] border border-slate-800 rounded-xl text-white outline-none"
+                    className="w-full p-3 bg-[#111113] border border-slate-800 rounded-xl text-white outline-none"
                   />
                 </div>
               </div>
@@ -471,14 +464,14 @@ const Inventory = () => {
                   onClick={resetForm}
                   className="flex-1 py-3.5 bg-slate-800 text-slate-300 font-bold rounded-xl hover:bg-slate-700 transition-colors"
                 >
-                  {t("cancel")}
+                  Cancel
                 </button>
                 <button
                   onClick={handleSaveItem}
                   disabled={isSubmitting}
                   className="flex-1 py-3.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 shadow-lg active:scale-95 transition-all"
                 >
-                  {isSubmitting ? t("saving") : t("save")}
+                  {isSubmitting ? "Saving..." : "Save Item"}
                 </button>
               </div>
             </div>
@@ -492,22 +485,24 @@ const Inventory = () => {
             className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm"
             onClick={() => setDeleteId(null)}
           />
-          <div className="bg-[#111827] border border-slate-800 p-6 rounded-3xl w-full max-w-sm shadow-2xl relative">
-            <h3 className="text-xl font-black text-white mb-2">
-              {t("delete")} Item?
-            </h3>
+          <div className="bg-[#111113] border border-slate-800 p-6 rounded-3xl w-full max-w-sm shadow-2xl relative">
+            <h3 className="text-xl font-black text-white mb-2">Delete Item?</h3>
+            <p className="text-slate-400 text-sm">
+              Are you sure you want to remove this item? This action cannot be
+              undone.
+            </p>
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setDeleteId(null)}
-                className="flex-1 py-3 bg-slate-800 text-white rounded-xl"
+                className="flex-1 py-3 bg-slate-800 text-white rounded-xl font-bold"
               >
-                {t("cancel")}
+                Cancel
               </button>
               <button
                 onClick={confirmDelete}
                 className="flex-1 py-3 bg-rose-600 text-white rounded-xl font-bold"
               >
-                {t("delete")}
+                Delete
               </button>
             </div>
           </div>

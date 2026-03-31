@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 function DashboardPreview() {
   const navigate = useNavigate();
   return (
-    <section className="py-24 bg-[#0b1120]">
+    <section className="py-24 bg-[#09090b]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-16">
         {/* Image Side */}
         <div className="flex-1 w-full">

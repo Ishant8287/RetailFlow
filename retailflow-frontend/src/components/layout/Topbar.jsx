@@ -1,10 +1,8 @@
 import { Menu } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { useTranslation } from "react-i18next";
 
 const Topbar = ({ setSidebarOpen }) => {
-  const { t, i18n } = useTranslation();
   const [initials, setInitials] = useState("RF");
   const [shopName, setShopName] = useState("");
   const [userAvatar, setUserAvatar] = useState(null);
@@ -12,32 +10,26 @@ const Topbar = ({ setSidebarOpen }) => {
 
   const getPageTitle = (path) => {
     const map = {
-      "/dashboard": t("dashboard"),
-      "/dashboard/pos": t("pos"),
-      "/dashboard/inventory": t("inventory"),
-      "/dashboard/stock-adjustment": t("stockAdjustment"),
-      "/dashboard/khata": t("khata"),
-      "/dashboard/reports": t("reports"),
-      "/dashboard/settings": t("settings"),
-      "/dashboard/profile": t("profile"),
-      "/dashboard/expenses": t("expenses"),
-      "/dashboard/suppliers": t("suppliers"),
-      "/dashboard/staff": t("staff"),
+      "/dashboard": "Dashboard",
+      "/dashboard/pos": "POS",
+      "/dashboard/inventory": "Inventory",
+      "/dashboard/stock-adjustment": "Stock Adjustment",
+      "/dashboard/khata": "Khata",
+      "/dashboard/reports": "Reports",
+      "/dashboard/settings": "Settings",
+      "/dashboard/profile": "Profile",
+      "/dashboard/expenses": "Expenses",
+      "/dashboard/suppliers": "Suppliers",
+      "/dashboard/staff": "Staff",
     };
     if (map[path]) return map[path];
     for (const [key, val] of Object.entries(map)) {
       if (path.startsWith(key) && key !== "/dashboard") return val;
     }
-    return t("dashboard");
+    return "Dashboard";
   };
 
   const currentPage = getPageTitle(location.pathname);
-
-  const toggleLanguage = () => {
-    const newLang = i18n.language === "en" ? "hi" : "en";
-    i18n.changeLanguage(newLang);
-    localStorage.setItem("retailflow_lang", newLang);
-  };
 
   const syncData = () => {
     const savedShop = localStorage.getItem("retailflow_shop");
@@ -61,7 +53,7 @@ const Topbar = ({ setSidebarOpen }) => {
   }, []);
 
   return (
-    <div className="h-16 border-b border-slate-800 bg-[#0b1120] flex items-center justify-between px-4 md:px-6 z-30 sticky top-0">
+    <div className="h-16 border-b border-slate-800 bg-[#09090b] flex items-center justify-between px-4 md:px-6 z-30 sticky top-0">
       <div className="flex items-center gap-4 min-w-0 flex-1">
         <button
           className="md:hidden p-2 bg-slate-800 text-slate-300 rounded-xl shrink-0"
@@ -80,21 +72,10 @@ const Topbar = ({ setSidebarOpen }) => {
       </div>
 
       <div className="flex items-center gap-3 md:gap-4 shrink-0">
-        {/* Language Toggle */}
-        <button
-          onClick={toggleLanguage}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl transition-all"
-          title="Switch Language"
-        >
-          <span className="text-xs font-black text-white">
-            {i18n.language === "en" ? "🇮🇳 हिं" : "🇬🇧 EN"}
-          </span>
-        </button>
-
         <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 rounded-full border border-emerald-500/20">
           <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
           <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
-            {t("live")}
+            {"Live"}
           </span>
         </div>
 

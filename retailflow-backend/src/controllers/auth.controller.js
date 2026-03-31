@@ -1,6 +1,9 @@
+import dotenv from "dotenv";
+dotenv.config();
 import Shop from "../models/Shop.js";
 import Staff from "../models/Staff.js";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { Resend } from "resend";
 
 const sanitizeShop = (shop) => {
@@ -23,7 +26,7 @@ const sendEmail = async (to, subject, html) => {
 };
 
 const otpHtml = (rawOtp, title, subtitle) => `
-  <div style="font-family:sans-serif;max-width:480px;margin:0 auto;background:#0b1120;color:#fff;padding:32px;border-radius:16px;">
+  <div style="font-family:sans-serif;max-width:480px;margin:0 auto;background:#09090b;color:#fff;padding:32px;border-radius:16px;">
     <h2 style="color:#6366f1;">${title}</h2>
     <p>${subtitle}</p>
     <div style="font-size:36px;font-weight:900;color:#6366f1;letter-spacing:8px;padding:16px;background:#1e293b;border-radius:8px;text-align:center;">${rawOtp}</div>
@@ -33,6 +36,10 @@ const otpHtml = (rawOtp, title, subtitle) => `
   </div>
 `;
 
+const hashOtp = (otp) => crypto.createHash("sha256").update(otp).digest("hex");
+
+const generateOtp = () => crypto.randomInt(100000, 1000000).toString();
+
 export const register = async (req, res) => {
   try {
     const { ownerName, shopName, email, password, phone } = req.body;
@@ -41,7 +48,7 @@ export const register = async (req, res) => {
         .status(400)
         .json({ success: false, message: "All fields are required." });
 
-    const shopExists = await Shop.findOne({ email });
+    const shopExists = await Shop.findOne({ email }).lean();
     if (shopExists)
       return res.status(400).json({
         success: false,
@@ -78,6 +85,7 @@ export const sendOtp = async (req, res) => {
       contactMethod === "email"
         ? { email: contactValue }
         : { phone: contactValue };
+
     const shop = await Shop.findOne(query);
     if (!shop)
       return res.status(404).json({
@@ -85,37 +93,27 @@ export const sendOtp = async (req, res) => {
         message: "No RetailFlow account found with this detail.",
       });
 
-    const rawOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    const rawOtp = generateOtp();
     console.log(`\n=========================================`);
     console.log(`🔑 OTP for ${contactValue}: ${rawOtp}`);
     console.log(`=========================================\n`);
 
-    const salt = await bcrypt.genSalt(10);
-    shop.otp = await bcrypt.hash(rawOtp, salt);
+    shop.otp = hashOtp(rawOtp);
     shop.otpExpires = Date.now() + 10 * 60 * 1000;
     await shop.save();
 
-    // FIX: Was guarded by EMAIL_USER/EMAIL_PASS which are never set on Render.
-    // Resend only needs RESEND_API_KEY — always attempt email if contactMethod is email.
-    if (contactMethod === "email") {
-      try {
-        await sendEmail(
-          shop.email,
-          "RetailFlow - Your Login OTP",
-          otpHtml(rawOtp, "RetailFlow Login", "Your one-time login OTP is:"),
-        );
-      } catch (emailErr) {
-        console.error(
-          "Email failed (OTP still in terminal):",
-          emailErr.message,
-        );
-      }
-    }
-
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       message: `OTP sent! Check your ${contactMethod}.`,
     });
+
+    if (contactMethod === "email") {
+      sendEmail(
+        shop.email,
+        "RetailFlow - Your Login OTP",
+        otpHtml(rawOtp, "RetailFlow Login", "Your one-time login OTP is:"),
+      ).catch((err) => console.error("Email failed:", err.message));
+    }
   } catch (error) {
     console.error("OTP Send Error:", error);
     return res
@@ -136,6 +134,7 @@ export const verifyOtp = async (req, res) => {
       contactMethod === "email"
         ? { email: contactValue }
         : { phone: contactValue };
+
     const shop = await Shop.findOne(query).select("+otp +otpExpires");
     if (!shop)
       return res
@@ -154,7 +153,7 @@ export const verifyOtp = async (req, res) => {
         message: "OTP expired. Please request a new one.",
       });
 
-    const isMatch = await bcrypt.compare(otp, shop.otp);
+    const isMatch = shop.otp === hashOtp(otp);
     if (!isMatch)
       return res.status(400).json({
         success: false,
@@ -270,35 +269,28 @@ export const forgotPassword = async (req, res) => {
         .status(404)
         .json({ success: false, message: "No account found with this email." });
 
-    const rawOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    const rawOtp = generateOtp();
     console.log(`\n=========================================`);
     console.log(`🔑 FORGOT PASSWORD OTP for ${email}: ${rawOtp}`);
     console.log(`=========================================\n`);
 
-    const salt = await bcrypt.genSalt(10);
-    shop.otp = await bcrypt.hash(rawOtp, salt);
+    shop.otp = hashOtp(rawOtp);
     shop.otpExpires = Date.now() + 10 * 60 * 1000;
     await shop.save();
 
-    // FIX: Same issue as sendOtp — was guarded by EMAIL_USER/EMAIL_PASS.
-    // Always attempt to send via Resend.
-    try {
-      await sendEmail(
-        shop.email,
-        "RetailFlow - Password Reset OTP",
-        otpHtml(
-          rawOtp,
-          "Reset Your Password",
-          "You requested a password reset. Your OTP is:",
-        ),
-      );
-    } catch (emailErr) {
-      console.error("Reset email failed (OTP in terminal):", emailErr.message);
-    }
-
-    return res
+    res
       .status(200)
       .json({ success: true, message: "Password reset OTP sent." });
+
+    sendEmail(
+      shop.email,
+      "RetailFlow - Password Reset OTP",
+      otpHtml(
+        rawOtp,
+        "Reset Your Password",
+        "You requested a password reset. Your OTP is:",
+      ),
+    ).catch((err) => console.error("Reset email failed:", err.message));
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -338,7 +330,7 @@ export const resetPassword = async (req, res) => {
         message: "OTP expired. Please request a new one.",
       });
 
-    const isMatch = await bcrypt.compare(otp, shop.otp);
+    const isMatch = shop.otp === hashOtp(otp);
     if (!isMatch)
       return res.status(400).json({ success: false, message: "Invalid OTP." });
 
@@ -396,7 +388,7 @@ export const changePassword = async (req, res) => {
 
 export const getMe = async (req, res) => {
   try {
-    const shop = await Shop.findById(req.shop.id);
+    const shop = await Shop.findById(req.shop.id).lean();
     if (!shop)
       return res
         .status(404)

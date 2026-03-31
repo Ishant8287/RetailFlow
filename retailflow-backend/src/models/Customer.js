@@ -27,7 +27,7 @@ const customerSchema = new mongoose.Schema(
 );
 
 // Indexes
-customerSchema.index({ shop: 1, createdAt: -1 });
 customerSchema.index({ shop: 1, totalUdhaar: 1, nextReminderDate: 1 }); // For reminders query
+customerSchema.index({ shop: 1 });
 
 export default mongoose.model("Customer", customerSchema);

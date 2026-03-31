@@ -35,7 +35,7 @@ const ProtectedRoute = ({ children }) => {
 
 const App = () => {
   return (
-    <div className="min-h-screen w-full bg-[#0b1120]">
+    <div className="min-h-screen w-full bg-[#09090b]">
       <Toaster richColors position="top-right" theme="dark" />
       <Routes>
         <Route

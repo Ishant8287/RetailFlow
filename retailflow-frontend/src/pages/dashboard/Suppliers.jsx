@@ -11,11 +11,9 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { useTranslation } from "react-i18next";
 import API from "../../api/axiosInstance";
 
 const Suppliers = () => {
-  const { t } = useTranslation();
   const { items } = useOutletContext();
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -60,7 +58,7 @@ const Suppliers = () => {
     try {
       const res = await API.post("/suppliers", form);
       setSuppliers((prev) => [res.data.data, ...prev]);
-      toast.success("Supplier added!");
+      toast.success("Supplier added successfully!");
       setForm({ name: "", phone: "", email: "", address: "", gstin: "" });
       setIsDrawerOpen(false);
     } catch (err) {
@@ -146,33 +144,33 @@ const Suppliers = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-black tracking-tight">
-            {t("supplierManagement")}
+            Supplier Management
           </h1>
           <p className="text-sm text-slate-400 mt-0.5">
-            Track vendors, record purchases, update stock automatically.
+            Track vendors, record purchases, and update stock automatically.
           </p>
         </div>
         <button
           onClick={() => setIsDrawerOpen(true)}
           className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-md active:scale-95 transition-all"
         >
-          <Plus size={18} /> {t("addSupplier")}
+          <Plus size={18} /> Add Supplier
         </button>
       </div>
 
       {loading ? (
-        <div className="text-center text-slate-500 py-10">{t("loading")}</div>
+        <div className="text-center text-slate-500 py-10">Loading...</div>
       ) : suppliers.length === 0 ? (
         <div className="text-center py-16 text-slate-500">
           <Truck size={48} className="mx-auto mb-4 opacity-20" />
-          <p className="font-bold">{t("noSuppliers")}</p>
+          <p className="font-bold">No Suppliers Found</p>
         </div>
       ) : (
         <div className="space-y-4">
           {suppliers.map((supplier) => (
             <div
               key={supplier._id}
-              className="bg-[#111827] border border-slate-800 rounded-2xl overflow-hidden"
+              className="bg-[#111113] border border-slate-800 rounded-2xl overflow-hidden"
             >
               <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
@@ -198,7 +196,7 @@ const Suppliers = () => {
                 <div className="flex items-center gap-3">
                   <div className="text-right">
                     <p className="text-xs text-slate-500 uppercase font-bold">
-                      {t("totalPurchased")}
+                      Total Purchased
                     </p>
                     <p className="font-black text-emerald-400">
                       ₹
@@ -210,7 +208,7 @@ const Suppliers = () => {
                   {supplier.totalDue > 0 && (
                     <div className="text-right">
                       <p className="text-xs text-slate-500 uppercase font-bold">
-                        {t("due")}
+                        Due
                       </p>
                       <p className="font-black text-rose-400">
                         ₹
@@ -227,7 +225,7 @@ const Suppliers = () => {
                     }}
                     className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700"
                   >
-                    <ShoppingBag size={16} /> {t("newPurchase")}
+                    <ShoppingBag size={16} /> New Purchase
                   </button>
                   <button
                     onClick={() =>
@@ -250,7 +248,7 @@ const Suppliers = () => {
                 supplier.purchaseHistory?.length > 0 && (
                   <div className="border-t border-slate-800 p-5">
                     <h4 className="text-xs font-bold text-slate-400 uppercase mb-3">
-                      {t("purchaseHistoryTitle")}
+                      Purchase History
                     </h4>
                     <div className="space-y-3">
                       {supplier.purchaseHistory.map((purchase, idx) => (
@@ -260,7 +258,7 @@ const Suppliers = () => {
                         >
                           <div>
                             <p className="text-sm font-bold text-white">
-                              {purchase.items?.length} {t("items")}
+                              {purchase.items?.length} Items
                             </p>
                             <p className="text-xs text-slate-500">
                               {new Date(purchase.date).toLocaleDateString(
@@ -277,7 +275,7 @@ const Suppliers = () => {
                             </p>
                             {purchase.totalAmount > purchase.amountPaid && (
                               <p className="text-xs text-rose-400">
-                                {t("due")}: ₹
+                                Due: ₹
                                 {new Intl.NumberFormat("en-IN").format(
                                   purchase.totalAmount - purchase.amountPaid,
                                 )}
@@ -300,9 +298,9 @@ const Suppliers = () => {
             onClick={() => setIsDrawerOpen(false)}
             className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40"
           />
-          <div className="fixed top-0 right-0 h-dvh w-full sm:w-96 bg-[#0f172a] border-l border-slate-800 p-6 pb-24 z-50 overflow-y-auto shadow-2xl">
+          <div className="fixed top-0 right-0 h-dvh w-full sm:w-96 bg-[#111113] border-l border-slate-800 p-6 pb-24 z-50 overflow-y-auto shadow-2xl">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-black">{t("addSupplier")}</h2>
+              <h2 className="text-xl font-black">Add Supplier</h2>
               <button onClick={() => setIsDrawerOpen(false)}>
                 <X size={20} className="text-slate-400" />
               </button>
@@ -310,26 +308,26 @@ const Suppliers = () => {
             <div className="space-y-4">
               {[
                 {
-                  label: `${t("name")} *`,
+                  label: "Name *",
                   key: "name",
                   placeholder: "Supplier name",
                 },
                 {
-                  label: `${t("phone")} *`,
+                  label: "Phone *",
                   key: "phone",
                   placeholder: "10-digit number",
                 },
                 {
-                  label: t("email"),
+                  label: "Email",
                   key: "email",
                   placeholder: "email@example.com",
                 },
                 {
-                  label: t("address"),
+                  label: "Address",
                   key: "address",
                   placeholder: "Business address",
                 },
-                { label: t("gstin"), key: "gstin", placeholder: "Optional" },
+                { label: "GSTIN", key: "gstin", placeholder: "Optional" },
               ].map(({ label, key, placeholder }) => (
                 <div key={key}>
                   <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">
@@ -341,7 +339,7 @@ const Suppliers = () => {
                       setForm({ ...form, [key]: e.target.value })
                     }
                     placeholder={placeholder}
-                    className="w-full p-3 bg-[#111827] border border-slate-800 rounded-xl text-white outline-none focus:border-indigo-500"
+                    className="w-full p-3 bg-[#111113] border border-slate-800 rounded-xl text-white outline-none focus:border-indigo-500"
                   />
                 </div>
               ))}
@@ -350,14 +348,14 @@ const Suppliers = () => {
                   onClick={() => setIsDrawerOpen(false)}
                   className="flex-1 py-3 bg-slate-800 text-slate-300 font-bold rounded-xl"
                 >
-                  {t("cancel")}
+                  Cancel
                 </button>
                 <button
                   onClick={handleAddSupplier}
                   disabled={isSubmitting}
                   className="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl disabled:opacity-50"
                 >
-                  {isSubmitting ? t("saving") : t("addSupplier")}
+                  {isSubmitting ? "Saving..." : "Add Supplier"}
                 </button>
               </div>
             </div>
@@ -371,10 +369,10 @@ const Suppliers = () => {
             onClick={() => setIsPurchaseOpen(false)}
             className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-40"
           />
-          <div className="fixed top-0 right-0 h-dvh w-full sm:w-125 bg-[#0f172a] border-l border-slate-800 p-6 pb-24 z-50 overflow-y-auto shadow-2xl">
+          <div className="fixed top-0 right-0 h-dvh w-full sm:w-125 bg-[#111113] border-l border-slate-800 p-6 pb-24 z-50 overflow-y-auto shadow-2xl">
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h2 className="text-xl font-black">{t("newPurchase")}</h2>
+                <h2 className="text-xl font-black">New Purchase</h2>
                 <p className="text-sm text-slate-400">
                   from {selectedSupplier.name}
                 </p>
@@ -386,7 +384,7 @@ const Suppliers = () => {
             <div className="space-y-4">
               <div>
                 <label className="text-xs font-bold text-slate-400 uppercase mb-2 block">
-                  {t("items")}
+                  Items
                 </label>
                 {purchaseForm.items.map((item, idx) => (
                   <div key={idx} className="grid grid-cols-2 gap-2 mb-2">
@@ -395,7 +393,7 @@ const Suppliers = () => {
                       onChange={(e) =>
                         updatePurchaseItem(idx, "itemId", e.target.value)
                       }
-                      className="col-span-2 p-2 bg-[#111827] border border-slate-800 rounded-xl text-white text-sm outline-none"
+                      className="col-span-2 p-2 bg-[#111113] border border-slate-800 rounded-xl text-white text-sm outline-none"
                     >
                       <option value="">Select from inventory (optional)</option>
                       {items.map((i) => (
@@ -410,7 +408,7 @@ const Suppliers = () => {
                       onChange={(e) =>
                         updatePurchaseItem(idx, "name", e.target.value)
                       }
-                      className="p-2 bg-[#111827] border border-slate-800 rounded-xl text-white text-sm outline-none"
+                      className="p-2 bg-[#111113] border border-slate-800 rounded-xl text-white text-sm outline-none"
                     />
                     <input
                       type="number"
@@ -419,7 +417,7 @@ const Suppliers = () => {
                       onChange={(e) =>
                         updatePurchaseItem(idx, "quantity", e.target.value)
                       }
-                      className="p-2 bg-[#111827] border border-slate-800 rounded-xl text-white text-sm outline-none"
+                      className="p-2 bg-[#111113] border border-slate-800 rounded-xl text-white text-sm outline-none"
                     />
                     <input
                       type="number"
@@ -428,7 +426,7 @@ const Suppliers = () => {
                       onChange={(e) =>
                         updatePurchaseItem(idx, "unitCost", e.target.value)
                       }
-                      className="col-span-2 p-2 bg-[#111827] border border-slate-800 rounded-xl text-white text-sm outline-none"
+                      className="col-span-2 p-2 bg-[#111113] border border-slate-800 rounded-xl text-white text-sm outline-none"
                     />
                   </div>
                 ))}
@@ -436,12 +434,12 @@ const Suppliers = () => {
                   onClick={addPurchaseRow}
                   className="text-indigo-400 text-sm font-bold flex items-center gap-1 mt-1"
                 >
-                  <Plus size={14} /> {t("add")} Item
+                  <Plus size={14} /> Add Item
                 </button>
               </div>
               <div>
                 <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">
-                  {t("amount")} Paid
+                  Amount Paid
                 </label>
                 <input
                   type="number"
@@ -453,7 +451,7 @@ const Suppliers = () => {
                       amountPaid: e.target.value,
                     })
                   }
-                  className="w-full p-3 bg-[#111827] border border-slate-800 rounded-xl text-white outline-none focus:border-indigo-500"
+                  className="w-full p-3 bg-[#111113] border border-slate-800 rounded-xl text-white outline-none focus:border-indigo-500"
                 />
               </div>
               <div>
@@ -469,7 +467,7 @@ const Suppliers = () => {
                       invoiceNumber: e.target.value,
                     })
                   }
-                  className="w-full p-3 bg-[#111827] border border-slate-800 rounded-xl text-white outline-none"
+                  className="w-full p-3 bg-[#111113] border border-slate-800 rounded-xl text-white outline-none"
                 />
               </div>
               <div className="flex gap-3 pt-4">
@@ -477,14 +475,14 @@ const Suppliers = () => {
                   onClick={() => setIsPurchaseOpen(false)}
                   className="flex-1 py-3 bg-slate-800 text-slate-300 font-bold rounded-xl"
                 >
-                  {t("cancel")}
+                  Cancel
                 </button>
                 <button
                   onClick={handleRecordPurchase}
                   disabled={isSubmitting}
                   className="flex-1 py-3 bg-emerald-600 text-white font-bold rounded-xl disabled:opacity-50"
                 >
-                  {isSubmitting ? t("loading") : "Record Purchase"}
+                  {isSubmitting ? "Processing..." : "Record Purchase"}
                 </button>
               </div>
             </div>

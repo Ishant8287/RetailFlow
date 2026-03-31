@@ -97,7 +97,7 @@ const Signup = () => {
   return (
     <>
       <Navbar /> {/* 👈 Navbar added */}
-      <div className="min-h-screen flex items-center bg-[#0b1120] justify-center px-4 py-10 pt-28">
+      <div className="min-h-screen flex items-center bg-[#09090b] justify-center px-4 py-10 pt-28">
         {" "}
         <div className="bg-white/5 border w-full max-w-md backdrop-blur-md p-8 shadow-lg shadow-black/30 border-white/10 rounded-2xl">
           <div className="text-center mb-8">

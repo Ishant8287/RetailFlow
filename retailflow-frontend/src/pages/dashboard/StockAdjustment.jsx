@@ -101,31 +101,31 @@ const StockAdjustment = () => {
     <div className="text-white space-y-6 bg-transparent min-h-screen pb-20">
       <div>
         <h1 className="text-2xl font-black tracking-tight">
-          {t("stockAdjustmentTitle")}
+          {t("Stock Adjustment")}
         </h1>
         <p className="text-sm text-slate-400 font-medium mt-0.5">
-          {t("manuallyAdjust")}
+          {t("Manually Adjust")}
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* LEFT: FORM */}
-        <div className="bg-[#111827] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm h-fit">
+        <div className="bg-[#111113] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm h-fit">
           <div className="flex items-center gap-2 text-indigo-400 mb-6">
             <PackageMinus size={20} />
-            <h2 className="text-lg font-bold">{t("newAdjustment")}</h2>
+            <h2 className="text-lg font-bold">{t("New Adjustment")}</h2>
           </div>
           <div className="space-y-5">
             <div>
               <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">
-                {t("selectItem")}
+                {t("Select Item")}
               </label>
               <select
                 value={selectedItemId}
                 onChange={(e) => setSelectedItemId(e.target.value)}
-                className="w-full p-3 bg-[#0b1120] border border-slate-700 rounded-xl text-sm font-bold text-white outline-none focus:border-indigo-500"
+                className="w-full p-3 bg-[#09090b] border border-slate-700 rounded-xl text-sm font-bold text-white outline-none focus:border-indigo-500"
               >
-                <option value="">{t("chooseItem")}</option>
+                <option value="">{t("Choose Item")}</option>
                 {items.map((item) => (
                   <option key={item._id} value={item._id}>
                     {item.name} ({t("inStock")}: {getTotalStock(item)})
@@ -136,42 +136,42 @@ const StockAdjustment = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">
-                  {t("adjustmentType")}
+                  {t("Adjustment Type")}
                 </label>
                 <select
                   value={type}
                   onChange={(e) => setType(e.target.value)}
-                  className="w-full p-3 bg-[#0b1120] border border-slate-700 rounded-xl text-sm font-bold text-white outline-none focus:border-indigo-500"
+                  className="w-full p-3 bg-[#09090b] border border-slate-700 rounded-xl text-sm font-bold text-white outline-none focus:border-indigo-500"
                 >
-                  <option value="add">{t("addStockOption")}</option>
-                  <option value="reduce">{t("reduceStockOption")}</option>
-                  <option value="expired">{t("markExpired")}</option>
-                  <option value="damaged">{t("markDamaged")}</option>
+                  <option value="add">{t("Add Stock Option")}</option>
+                  <option value="reduce">{t("Reduce Stock Option")}</option>
+                  <option value="expired">{t("Mark Expired")}</option>
+                  <option value="damaged">{t("Mark Damaged")}</option>
                 </select>
               </div>
               <div>
                 <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">
-                  {t("quantity")}
+                  {t("Quantity")}
                 </label>
                 <input
                   type="number"
                   placeholder="0"
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
-                  className="w-full p-3 bg-[#0b1120] border border-slate-700 rounded-xl text-sm font-bold text-white outline-none focus:border-indigo-500"
+                  className="w-full p-3 bg-[#09090b] border border-slate-700 rounded-xl text-sm font-bold text-white outline-none focus:border-indigo-500"
                 />
               </div>
             </div>
             <div>
               <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">
-                {t("reasonOptional")}
+                {t("Reason Optional")}
               </label>
               <textarea
                 rows="2"
                 placeholder="e.g. Found damaged during shifting"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                className="w-full p-3 bg-[#0b1120] border border-slate-700 rounded-xl text-sm font-medium focus:border-indigo-500 resize-none text-white placeholder:text-slate-600"
+                className="w-full p-3 bg-[#09090b] border border-slate-700 rounded-xl text-sm font-medium focus:border-indigo-500 resize-none text-white placeholder:text-slate-600"
               />
             </div>
             <button
@@ -179,20 +179,20 @@ const StockAdjustment = () => {
               disabled={isSubmitting}
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3.5 rounded-xl font-black shadow-lg shadow-indigo-600/20 active:scale-95 transition-all mt-4"
             >
-              {isSubmitting ? t("updatingDatabase") : t("applyAdjustment")}
+              {isSubmitting ? t("Updating Database") : t("Apply Adjustment")}
             </button>
           </div>
         </div>
 
         {/* RIGHT: HISTORY */}
-        <div className="bg-[#111827] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm">
+        <div className="bg-[#111113] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm">
           <h2 className="text-lg font-bold mb-6 text-white">
-            {t("recentAdjustments")}
+            {t("Recent Adjustments")}
           </h2>
           {!selectedItem ? (
             <div className="text-center text-slate-500 py-10 opacity-70">
               <PackageMinus size={40} className="mx-auto mb-2" />
-              <p className="text-sm font-bold">{t("selectItemToView")}</p>
+              <p className="text-sm font-bold">{t("Select Item To View")}</p>
             </div>
           ) : selectedItem.adjustments?.length > 0 ? (
             <div className="space-y-4 max-h-100 overflow-y-auto pr-2">
@@ -236,7 +236,7 @@ const StockAdjustment = () => {
             </div>
           ) : (
             <div className="text-center text-slate-500 py-10 opacity-70">
-              <p className="text-sm font-bold">{t("noAdjustments")}</p>
+              <p className="text-sm font-bold">{t("No Adjustments")}</p>
             </div>
           )}
         </div>

@@ -4,7 +4,7 @@ import { Rocket, Users, Heart, Globe } from "lucide-react";
 
 const About = () => {
   return (
-    <div className="bg-[#0b1120] min-h-screen flex flex-col">
+    <div className="bg-[#09090b] min-h-screen flex flex-col">
       <Navbar />
 
       <main className="flex-1 pt-32 pb-20 px-6 max-w-7xl mx-auto w-full">
@@ -47,7 +47,7 @@ const About = () => {
         </div>
 
         {/* Story Section */}
-        <div className="bg-[#111827] border border-slate-800 rounded-[40px] p-10 md:p-16 flex flex-col md:flex-row items-center gap-12 shadow-2xl">
+        <div className="bg-[#111113] border border-slate-800 rounded-[40px] p-10 md:p-16 flex flex-col md:flex-row items-center gap-12 shadow-2xl">
           <div className="flex-1">
             <h2 className="text-3xl font-black text-white mb-6">
               The RetailFlow Story
@@ -78,7 +78,7 @@ const About = () => {
 };
 
 const AboutCard = ({ icon, title, desc }) => (
-  <div className="bg-[#111827] border border-slate-800 p-8 rounded-3xl hover:border-indigo-500/50 transition-all group">
+  <div className="bg-[#111113] border border-slate-800 p-8 rounded-3xl hover:border-indigo-500/50 transition-all group">
     <div className="mb-4 bg-slate-800/50 w-12 h-12 flex items-center justify-center rounded-2xl group-hover:scale-110 transition-transform">
       {icon}
     </div>

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Plus, Trash2, Wallet, X } from "lucide-react";
-import { useTranslation } from "react-i18next";
 import API from "../../api/axiosInstance";
 
 const CATEGORIES = [
@@ -17,7 +16,6 @@ const CATEGORIES = [
 const PAYMENT_METHODS = ["Cash", "UPI", "Bank Transfer", "Other"];
 
 const Expenses = () => {
-  const { t } = useTranslation();
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -108,7 +106,7 @@ const Expenses = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-black tracking-tight">
-            {t("expenseTracker")}
+            Expense Tracker
           </h1>
           <p className="text-sm text-slate-400 mt-0.5">
             Track all business costs for accurate net profit.
@@ -118,14 +116,14 @@ const Expenses = () => {
           onClick={() => setIsDrawerOpen(true)}
           className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-md active:scale-95 transition-all"
         >
-          <Plus size={18} /> {t("addExpense")}
+          <Plus size={18} /> Add Expense
         </button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <div className="bg-[#111827] border border-slate-800 rounded-2xl p-5 col-span-1 sm:col-span-2 xl:col-span-1">
+        <div className="bg-[#111113] border border-slate-800 rounded-2xl p-5 col-span-1 sm:col-span-2 xl:col-span-1">
           <p className="text-slate-400 text-xs font-bold uppercase mb-1">
-            {t("totalExpenses")}
+            Total Expenses
           </p>
           <p className="text-3xl font-black text-rose-400">
             ₹{new Intl.NumberFormat("en-IN").format(totalAmount)}
@@ -136,7 +134,7 @@ const Expenses = () => {
           .map(([cat, amt]) => (
             <div
               key={cat}
-              className="bg-[#111827] border border-slate-800 rounded-2xl p-5"
+              className="bg-[#111113] border border-slate-800 rounded-2xl p-5"
             >
               <p className="text-slate-400 text-xs font-bold uppercase mb-1">
                 {cat}
@@ -148,13 +146,13 @@ const Expenses = () => {
           ))}
       </div>
 
-      <div className="bg-[#111827] border border-slate-800 rounded-2xl overflow-hidden">
+      <div className="bg-[#111113] border border-slate-800 rounded-2xl overflow-hidden">
         {loading ? (
-          <div className="p-10 text-center text-slate-500">{t("loading")}</div>
+          <div className="p-10 text-center text-slate-500">Loading...</div>
         ) : expenses.length === 0 ? (
           <div className="p-10 text-center text-slate-500">
             <Wallet size={36} className="mx-auto mb-3 opacity-30" />
-            <p className="font-bold">{t("noExpenses")}</p>
+            <p className="font-bold">No Expenses Recorded</p>
           </div>
         ) : (
           <div className="divide-y divide-slate-800/60">
@@ -208,11 +206,9 @@ const Expenses = () => {
             onClick={() => setIsDrawerOpen(false)}
             className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40"
           />
-          <div className="fixed top-0 right-0 h-dvh w-full sm:w-96 bg-[#0f172a] border-l border-slate-800 p-6 pb-24 z-50 overflow-y-auto shadow-2xl animate-in slide-in-from-right duration-300">
+          <div className="fixed top-0 right-0 h-dvh w-full sm:w-96 bg-[#111113] border-l border-slate-800 p-6 pb-24 z-50 overflow-y-auto shadow-2xl animate-in slide-in-from-right duration-300">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-black text-white">
-                {t("addExpense")}
-              </h2>
+              <h2 className="text-xl font-black text-white">Add Expense</h2>
               <button
                 onClick={() => setIsDrawerOpen(false)}
                 className="text-slate-400 hover:text-white"
@@ -223,14 +219,14 @@ const Expenses = () => {
             <div className="space-y-4">
               <div>
                 <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">
-                  {t("category")}
+                  Category
                 </label>
                 <select
                   value={form.category}
                   onChange={(e) =>
                     setForm({ ...form, category: e.target.value })
                   }
-                  className="w-full p-3 bg-[#111827] border border-slate-800 rounded-xl text-white outline-none"
+                  className="w-full p-3 bg-[#111113] border border-slate-800 rounded-xl text-white outline-none"
                 >
                   {CATEGORIES.map((c) => (
                     <option key={c}>{c}</option>
@@ -239,19 +235,19 @@ const Expenses = () => {
               </div>
               <div>
                 <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">
-                  {t("amount")}
+                  Amount
                 </label>
                 <input
                   type="number"
                   placeholder="₹ 0"
                   value={form.amount}
                   onChange={(e) => setForm({ ...form, amount: e.target.value })}
-                  className="w-full p-3 bg-[#111827] border border-slate-800 rounded-xl text-white outline-none focus:border-indigo-500"
+                  className="w-full p-3 bg-[#111113] border border-slate-800 rounded-xl text-white outline-none focus:border-indigo-500"
                 />
               </div>
               <div>
                 <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">
-                  {t("description")}
+                  Description
                 </label>
                 <input
                   type="text"
@@ -260,30 +256,30 @@ const Expenses = () => {
                   onChange={(e) =>
                     setForm({ ...form, description: e.target.value })
                   }
-                  className="w-full p-3 bg-[#111827] border border-slate-800 rounded-xl text-white outline-none focus:border-indigo-500"
+                  className="w-full p-3 bg-[#111113] border border-slate-800 rounded-xl text-white outline-none focus:border-indigo-500"
                 />
               </div>
               <div>
                 <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">
-                  {t("date")}
+                  Date
                 </label>
                 <input
                   type="date"
                   value={form.date}
                   onChange={(e) => setForm({ ...form, date: e.target.value })}
-                  className="w-full p-3 bg-[#111827] border border-slate-800 rounded-xl text-white outline-none"
+                  className="w-full p-3 bg-[#111113] border border-slate-800 rounded-xl text-white outline-none"
                 />
               </div>
               <div>
                 <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">
-                  {t("paymentMethod")}
+                  Payment Method
                 </label>
                 <select
                   value={form.paymentMethod}
                   onChange={(e) =>
                     setForm({ ...form, paymentMethod: e.target.value })
                   }
-                  className="w-full p-3 bg-[#111827] border border-slate-800 rounded-xl text-white outline-none"
+                  className="w-full p-3 bg-[#111113] border border-slate-800 rounded-xl text-white outline-none"
                 >
                   {PAYMENT_METHODS.map((m) => (
                     <option key={m}>{m}</option>
@@ -295,14 +291,14 @@ const Expenses = () => {
                   onClick={() => setIsDrawerOpen(false)}
                   className="flex-1 py-3 bg-slate-800 text-slate-300 font-bold rounded-xl"
                 >
-                  {t("cancel")}
+                  Cancel
                 </button>
                 <button
                   onClick={handleAdd}
                   disabled={isSubmitting}
                   className="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl disabled:opacity-50"
                 >
-                  {isSubmitting ? t("saving") : t("addExpense")}
+                  {isSubmitting ? "Saving..." : "Add Expense"}
                 </button>
               </div>
             </div>

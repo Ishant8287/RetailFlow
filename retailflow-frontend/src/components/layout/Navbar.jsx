@@ -33,7 +33,7 @@ function Navbar() {
 
   return (
     <>
-      <div className="fixed top-0 w-full z-50 bg-[#0b1120]/80 backdrop-blur-lg border-b border-slate-800">
+      <div className="fixed top-0 w-full z-50 bg-[#09090b]/80 backdrop-blur-lg border-b border-slate-800">
         <div className="max-w-7xl mx-auto h-20 px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 sm:gap-3 group">
             <div className="w-9 h-9 sm:w-11 sm:h-11 bg-indigo-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-white text-xl sm:text-2xl font-black shadow-lg shadow-indigo-600/30 group-hover:scale-105 transition-transform">
@@ -90,7 +90,7 @@ function Navbar() {
       </div>
 
       {open && (
-        <div className="fixed inset-0 z-100 bg-[#0b1120] flex flex-col items-center justify-center gap-8 text-white text-2xl font-black">
+        <div className="fixed inset-0 z-100 bg-[#09090b] flex flex-col items-center justify-center gap-8 text-white text-2xl font-black">
           <button
             className="absolute top-6 right-6 p-3 bg-slate-800 rounded-full text-slate-400 hover:text-white"
             onClick={() => setOpen(false)}

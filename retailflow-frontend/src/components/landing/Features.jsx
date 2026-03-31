@@ -11,7 +11,7 @@ function Features() {
   return (
     <section
       id="features"
-      className="py-24 bg-[#0b1120] relative transition-all duration-300"
+      className="py-24 bg-[#09090b] relative transition-all duration-300"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 className="text-3xl sm:text-5xl font-black text-white mb-6 tracking-tight">

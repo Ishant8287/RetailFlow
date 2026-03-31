@@ -3,11 +3,9 @@ import { useOutletContext, useNavigate } from "react-router-dom";
 import { Trash2, Plus, Minus, Search, Receipt, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
-import { useTranslation } from "react-i18next";
 import API from "../../api/axiosInstance";
 
 const POS = () => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const {
     items,
@@ -60,7 +58,7 @@ const POS = () => {
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [barcodeMode, items]);
 
   const addToCart = (product) => {
@@ -252,9 +250,7 @@ const POS = () => {
     <div className="flex flex-col lg:flex-row gap-6 text-white min-h-screen bg-transparent pb-20">
       <div className="flex-1 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-black tracking-tight">
-            {t("pointOfSale")}
-          </h2>
+          <h2 className="text-2xl font-black tracking-tight">Point of Sale</h2>
           <button
             onClick={() => {
               setBarcodeMode(!barcodeMode);
@@ -264,8 +260,7 @@ const POS = () => {
             }}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${barcodeMode ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "bg-slate-800 text-slate-400"}`}
           >
-            <Zap size={16} />{" "}
-            {barcodeMode ? t("scannerOn") : t("enableScanner")}
+            <Zap size={16} /> {barcodeMode ? "Scanner ON" : "Enable Scanner"}
           </button>
         </div>
 
@@ -277,10 +272,10 @@ const POS = () => {
           <input
             ref={searchRef}
             type="text"
-            placeholder={t("searchItems")}
+            placeholder="Search Items..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 bg-[#111827] border border-slate-800 rounded-xl text-white outline-none focus:border-indigo-500"
+            className="w-full pl-11 pr-4 py-3 bg-[#111113] border border-slate-800 rounded-xl text-white outline-none focus:border-indigo-500"
           />
         </div>
 
@@ -292,7 +287,7 @@ const POS = () => {
               <div
                 key={item._id}
                 onClick={() => addToCart(item)}
-                className="p-4 rounded-2xl bg-[#111827] border border-slate-800 hover:border-indigo-500 cursor-pointer active:scale-95 flex flex-col justify-between h-28 shadow-sm"
+                className="p-4 rounded-2xl bg-[#111113] border border-slate-800 hover:border-indigo-500 cursor-pointer active:scale-95 flex flex-col justify-between h-28 shadow-sm"
               >
                 <h3 className="font-bold text-sm line-clamp-2">{item.name}</h3>
                 <div className="flex justify-between items-center">
@@ -302,7 +297,7 @@ const POS = () => {
                   <span
                     className={`text-[10px] font-bold ${stock <= (item.alertQuantity || 5) ? "text-amber-400" : "text-slate-500"}`}
                   >
-                    {stock} {t("left")}
+                    {stock} Left
                   </span>
                 </div>
               </div>
@@ -312,9 +307,9 @@ const POS = () => {
       </div>
 
       {/* Cart Panel */}
-      <div className="w-full lg:w-100 bg-[#111827] border border-slate-800 rounded-3xl p-5 flex flex-col h-[calc(100vh-100px)] lg:sticky lg:top-20 shadow-xl">
+      <div className="w-full lg:w-100 bg-[#111113] border border-slate-800 rounded-3xl p-5 flex flex-col h-[calc(100vh-100px)] lg:sticky lg:top-20 shadow-xl">
         <h2 className="text-xl font-black mb-4 border-b border-slate-800 pb-3">
-          {t("cart")}{" "}
+          Cart{" "}
           <span className="text-indigo-400 text-sm bg-indigo-500/10 px-2 py-1 rounded ml-2">
             {cart.length}
           </span>
@@ -333,7 +328,7 @@ const POS = () => {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <div className="flex items-center bg-[#0b1120] border border-slate-700 rounded-lg">
+                <div className="flex items-center bg-[#09090b] border border-slate-700 rounded-lg">
                   <button
                     onClick={() => decreaseQty(c.itemId)}
                     className="p-1.5 text-slate-400"
@@ -361,7 +356,7 @@ const POS = () => {
           ))}
           {cart.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-slate-600 opacity-60">
-              <p className="text-sm font-bold">{t("cartEmpty")}</p>
+              <p className="text-sm font-bold">Cart is empty</p>
             </div>
           )}
         </div>
@@ -369,7 +364,7 @@ const POS = () => {
         <div className="pt-4 border-t border-slate-800">
           <div className="flex justify-between items-center mb-4 bg-slate-800/50 p-3 rounded-xl">
             <span className="text-slate-400 font-bold uppercase text-xs">
-              {t("total")}
+              Total
             </span>
             <span className="text-2xl font-black text-indigo-400">
               ₹{grandTotal.toFixed(2)}
@@ -379,22 +374,22 @@ const POS = () => {
           <div className="space-y-3 mb-4">
             <input
               type="tel"
-              placeholder={t("customerPhone")}
+              placeholder="Customer Phone"
               value={customerPhone}
               onChange={(e) => setCustomerPhone(e.target.value)}
-              className="w-full p-3 bg-[#0b1120] border border-slate-700 rounded-xl text-white outline-none focus:border-indigo-500"
+              className="w-full p-3 bg-[#09090b] border border-slate-700 rounded-xl text-white outline-none focus:border-indigo-500"
             />
             <div className="grid grid-cols-3 gap-2">
               {[
                 {
                   key: "cash",
-                  label: t("cash"),
+                  label: "Cash",
                   border: "border-emerald-500/20",
                 },
-                { key: "upi", label: t("upi"), border: "border-indigo-500/20" },
+                { key: "upi", label: "UPI", border: "border-indigo-500/20" },
                 {
                   key: "udhaar",
-                  label: t("udhaar"),
+                  label: "Udhaar",
                   border: "border-rose-500/30",
                 },
               ].map(({ key, label, border }) => (
@@ -406,7 +401,7 @@ const POS = () => {
                   onChange={(e) =>
                     setPayments({ ...payments, [key]: e.target.value })
                   }
-                  className={`w-full p-2.5 bg-[#0b1120] border ${border} rounded-xl text-white text-sm outline-none`}
+                  className={`w-full p-2.5 bg-[#09090b] border ${border} rounded-xl text-white text-sm outline-none`}
                 />
               ))}
             </div>
@@ -431,7 +426,7 @@ const POS = () => {
             onClick={handleCheckoutClick}
             className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black transition-all active:scale-95"
           >
-            {t("checkout")} ₹{grandTotal.toFixed(2)}
+            Checkout ₹{grandTotal.toFixed(2)}
           </button>
         </div>
       </div>
@@ -442,36 +437,36 @@ const POS = () => {
             className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm"
             onClick={() => setShowConfirmModal(false)}
           />
-          <div className="bg-[#111827] border border-slate-800 rounded-3xl w-full max-w-sm shadow-2xl relative overflow-hidden">
+          <div className="bg-[#111113] border border-slate-800 rounded-3xl w-full max-w-sm shadow-2xl relative overflow-hidden">
             <div className="bg-indigo-600 p-6 text-white text-center">
               <Receipt size={32} className="mx-auto mb-2 opacity-80" />
-              <h3 className="text-xl font-black">{t("confirmBill")}</h3>
+              <h3 className="text-xl font-black">Confirm Bill</h3>
             </div>
             <div className="p-6 space-y-3">
               <div className="flex justify-between">
-                <span className="text-slate-400">{t("items")}</span>
+                <span className="text-slate-400">Items</span>
                 <span className="font-bold">{cart.length}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">{t("cash")}</span>
+                <span className="text-slate-400">Cash</span>
                 <span className="font-bold text-emerald-400">
                   ₹{Number(payments.cash || 0).toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">{t("upi")}</span>
+                <span className="text-slate-400">UPI</span>
                 <span className="font-bold text-indigo-400">
                   ₹{Number(payments.upi || 0).toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">{t("udhaar")}</span>
+                <span className="text-slate-400">Udhaar</span>
                 <span className="font-bold text-rose-400">
                   ₹{Number(payments.udhaar || 0).toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between pt-2 border-t border-slate-700">
-                <span className="font-black">{t("total")}</span>
+                <span className="font-black">Total</span>
                 <span className="font-black text-indigo-400 text-lg">
                   ₹{grandTotal.toFixed(2)}
                 </span>
@@ -482,14 +477,14 @@ const POS = () => {
                 onClick={() => setShowConfirmModal(false)}
                 className="flex-1 py-3 text-slate-300 font-bold bg-slate-800 rounded-xl"
               >
-                {t("cancel")}
+                Cancel
               </button>
               <button
                 onClick={completeSale}
                 disabled={isSubmitting}
                 className="flex-1 py-3 bg-emerald-600 text-white font-bold rounded-xl disabled:opacity-50"
               >
-                {isSubmitting ? t("processing") : t("confirmSale")}
+                {isSubmitting ? "Processing..." : "Confirm Sale"}
               </button>
             </div>
           </div>

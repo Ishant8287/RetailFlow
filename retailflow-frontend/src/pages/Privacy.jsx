@@ -3,7 +3,7 @@ import Footer from "../components/layout/Footer";
 
 const Privacy = () => {
   return (
-    <div className="bg-[#0b1120] min-h-screen flex flex-col">
+    <div className="bg-[#09090b] min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 max-w-4xl mx-auto px-6 py-32 w-full">
         <h1 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">

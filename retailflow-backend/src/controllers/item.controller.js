@@ -1,4 +1,5 @@
 import Item from "../models/Item.js";
+import { cache } from "../utils/cache.js";
 
 // @desc    Add a new item
 // @route   POST /api/v1/items
@@ -18,6 +19,8 @@ export const addItem = async (req, res) => {
       hsn: hsn || "",
     });
 
+    cache.invalidate(`items:${req.shop.id}`);
+
     res
       .status(201)
       .json({ success: true, data: item, message: "Item added! 📦" });
@@ -30,7 +33,23 @@ export const addItem = async (req, res) => {
 // @route   GET /api/v1/items
 export const getItems = async (req, res) => {
   try {
-    const items = await Item.find({ shop: req.shop.id }).sort("-createdAt");
+    const key = `items:${req.shop.id}`;
+    const cached = cache.get(key);
+    if (cached) {
+      return res.status(200).json({
+        success: true,
+        count: cached.length,
+        data: cached,
+        cached: true,
+      });
+    }
+
+    const items = await Item.find({ shop: req.shop.id })
+      .sort("-createdAt")
+      .lean();
+
+    cache.set(key, items, 60_000); // 60s TTL
+
     res.status(200).json({ success: true, count: items.length, data: items });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -62,6 +81,8 @@ export const updateItem = async (req, res) => {
 
     await item.save();
 
+    cache.invalidate(`items:${req.shop.id}`);
+
     res
       .status(200)
       .json({ success: true, data: item, message: "Item updated!" });
@@ -84,6 +105,8 @@ export const deleteItem = async (req, res) => {
 
     await item.deleteOne();
 
+    cache.invalidate(`items:${req.shop.id}`);
+
     res.status(200).json({ success: true, message: "Item deleted." });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -93,29 +116,28 @@ export const deleteItem = async (req, res) => {
 // @desc    Get inventory stats
 // @route   GET /api/v1/items/stats
 export const getInventoryStats = async (req, res) => {
-  try {
-    const items = await Item.find({ shop: req.shop.id });
-
-    const totalItems = items.length;
-    const lowStockItems = items.filter((item) => {
-      const totalQty = item.batches.reduce((acc, b) => acc + b.quantity, 0);
-      return totalQty <= item.alertQuantity;
-    });
-
-    const outOfStock = items.filter((item) => {
-      return item.batches.reduce((acc, b) => acc + b.quantity, 0) === 0;
-    });
-
-    res.status(200).json({
-      success: true,
-      stats: {
-        totalItems,
-        lowStockCount: lowStockItems.length,
-        outOfStockCount: outOfStock.length,
-        lowStockDetails: lowStockItems,
+  const stats = await Item.aggregate([
+    { $match: { shop: new mongoose.Types.ObjectId(req.shop.id) } },
+    {
+      $project: {
+        totalQty: { $sum: "$batches.quantity" },
+        alertQuantity: 1,
+        isOutOfStock: {
+          $cond: [{ $eq: [{ $sum: "$batches.quantity" }, 0] }, 1, 0],
+        },
       },
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
+    },
+    {
+      $group: {
+        _id: null,
+        totalItems: { $sum: 1 },
+        lowStockCount: {
+          $sum: { $cond: [{ $lte: ["$totalQty", "$alertQuantity"] }, 1, 0] },
+        },
+        outOfStockCount: { $sum: "$isOutOfStock" },
+      },
+    },
+  ]);
+
+  res.status(200).json({ success: true, stats: stats[0] });
 };

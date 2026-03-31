@@ -16,7 +16,6 @@ const itemSchema = new mongoose.Schema(
     category: { type: String, default: "General" },
     unit: { type: String, required: true },
 
-   
     taxPercent: { type: Number, default: 0 },
     hsn: { type: String, default: "" },
 
@@ -33,7 +32,6 @@ const itemSchema = new mongoose.Schema(
 
     alertQuantity: { type: Number, default: 10 },
 
-    
     adjustments: [
       {
         type: { type: String, enum: ["add", "reduce", "expired", "damaged"] },
@@ -52,5 +50,7 @@ const itemSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+itemSchema.index({ shop: 1 });
 
 export default mongoose.model("Item", itemSchema);

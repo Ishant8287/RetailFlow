@@ -1,5 +1,5 @@
 import Staff from "../models/Staff.js";
-import bcrypt from "bcryptjs";
+import { cache } from "../utils/cache.js";
 
 // @route   POST /api/v1/staff
 export const addStaff = async (req, res) => {
@@ -7,12 +7,10 @@ export const addStaff = async (req, res) => {
     const { name, phone, role, pin, permissions } = req.body;
 
     if (!name || !phone || !pin) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Name, phone, and PIN are required.",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Name, phone, and PIN are required.",
+      });
     }
 
     if (pin.length < 4) {
@@ -21,14 +19,12 @@ export const addStaff = async (req, res) => {
         .json({ success: false, message: "PIN must be at least 4 digits." });
     }
 
-    const existing = await Staff.findOne({ phone });
+    const existing = await Staff.findOne({ phone }).lean();
     if (existing) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "A staff account with this phone already exists.",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "A staff account with this phone already exists.",
+      });
     }
 
     const staff = await Staff.create({
@@ -40,17 +36,16 @@ export const addStaff = async (req, res) => {
       permissions: permissions || {},
     });
 
-    // Return without pin
+    cache.invalidate(`staff:${req.shop.id}`);
+
     const staffObj = staff.toObject();
     delete staffObj.pin;
 
-    res
-      .status(201)
-      .json({
-        success: true,
-        data: staffObj,
-        message: `${name} added as ${role || "cashier"}!`,
-      });
+    res.status(201).json({
+      success: true,
+      data: staffObj,
+      message: `${name} added as ${role || "cashier"}!`,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -59,7 +54,25 @@ export const addStaff = async (req, res) => {
 // @route   GET /api/v1/staff
 export const getStaff = async (req, res) => {
   try {
-    const staff = await Staff.find({ shop: req.shop.id }).sort("-createdAt");
+    const key = `staff:${req.shop.id}`;
+    const cached = cache.get(key);
+    if (cached) {
+      return res
+        .status(200)
+        .json({
+          success: true,
+          count: cached.length,
+          data: cached,
+          cached: true,
+        });
+    }
+
+    const staff = await Staff.find({ shop: req.shop.id })
+      .sort("-createdAt")
+      .lean();
+
+    cache.set(key, staff, 120_000); // 2 min TTL — staff rarely changes
+
     res.status(200).json({ success: true, count: staff.length, data: staff });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -96,6 +109,8 @@ export const updateStaff = async (req, res) => {
 
     await staff.save();
 
+    cache.invalidate(`staff:${req.shop.id}`);
+
     const staffObj = staff.toObject();
     delete staffObj.pin;
 
@@ -120,6 +135,9 @@ export const removeStaff = async (req, res) => {
         .json({ success: false, message: "Staff not found." });
 
     await staff.deleteOne();
+
+    cache.invalidate(`staff:${req.shop.id}`);
+
     res.status(200).json({ success: true, message: "Staff removed." });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

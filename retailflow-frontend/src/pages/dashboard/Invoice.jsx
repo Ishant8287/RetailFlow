@@ -1,6 +1,5 @@
 /* eslint-disable no-unused-vars */
 import { useParams, useOutletContext } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import { QRCodeSVG } from "qrcode.react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -8,16 +7,14 @@ import { Printer, Download, Mail, Phone, MapPin } from "lucide-react";
 import { toast } from "sonner";
 
 const Invoice = () => {
-  const { t } = useTranslation();
   const { id } = useParams();
   const { sales = [], shopProfile = {} } = useOutletContext();
-
   const sale = sales.find((s) => String(s._id) === String(id));
 
   if (!sale) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-slate-500 font-bold bg-[#0b1120]">
-        {t("invoiceNotFound")}
+      <div className="min-h-screen flex items-center justify-center text-slate-500 font-bold bg-[#09090b]">
+        {"Invoice Not Found"}
       </div>
     );
   }
@@ -88,7 +85,7 @@ const Invoice = () => {
   };
 
   return (
-    <div className="bg-[#0b1120] min-h-screen p-4 md:p-10 flex justify-center pb-32">
+    <div className="bg-[#09090b] min-h-screen p-4 md:p-10 flex justify-center pb-32">
       <div className="bg-white text-slate-900 w-full max-w-200 shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col min-h-275 rounded-sm overflow-hidden border-t-12 border-indigo-600">
         {/* INVOICE HEADER */}
         <div className="p-10 flex flex-col md:flex-row justify-between gap-8 border-b border-slate-100">
@@ -254,15 +251,15 @@ const Invoice = () => {
       <div className="fixed bottom-8 right-8 flex flex-col md:flex-row gap-4 print:hidden">
         <button
           onClick={() => window.print()}
-          className="bg-[#111827] text-white px-8 py-4 rounded-2xl font-black shadow-2xl hover:bg-black transition-all flex items-center gap-3 active:scale-95"
+          className="bg-[#111113] text-white px-8 py-4 rounded-2xl font-black shadow-2xl hover:bg-black transition-all flex items-center gap-3 active:scale-95"
         >
-          <Printer size={20} /> {t("printInvoice")}
+          <Printer size={20} /> {"Print Invoice"}
         </button>
         <button
           onClick={downloadPDF}
           className="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black shadow-[0_10px_30px_rgba(79,70,229,0.4)] hover:bg-indigo-500 transition-all flex items-center gap-3 active:scale-95"
         >
-          <Download size={20} /> {t("saveAsPdf")}
+          <Download size={20} /> {"Save As Pdf"}
         </button>
       </div>
     </div>

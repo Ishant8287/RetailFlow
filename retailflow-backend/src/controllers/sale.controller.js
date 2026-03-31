@@ -2,10 +2,10 @@ import mongoose from "mongoose";
 import Sale from "../models/Sale.js";
 import Item from "../models/Item.js";
 import Customer from "../models/Customer.js";
+import { cache } from "../utils/cache.js";
 
 // @desc    Get all sales for the shop
 // @route   GET /api/v1/sales
-
 export const getSales = async (req, res) => {
   try {
     const { startDate, endDate, limit } = req.query;
@@ -22,9 +22,34 @@ export const getSales = async (req, res) => {
       }
     }
 
+    // Only cache the default (no date filters) listing
+    if (!startDate && !endDate) {
+      const key = `sales:${req.shop.id}:default`;
+      const cached = cache.get(key);
+      if (cached) {
+        return res
+          .status(200)
+          .json({
+            success: true,
+            count: cached.length,
+            data: cached,
+            cached: true,
+          });
+      }
+      const sales = await Sale.find(query)
+        .sort("-createdAt")
+        .limit(limit ? parseInt(limit) : 50)
+        .lean();
+      cache.set(key, sales, 30_000); // 30s TTL — sales change often
+      return res
+        .status(200)
+        .json({ success: true, count: sales.length, data: sales });
+    }
+
     const sales = await Sale.find(query)
       .sort("-createdAt")
-      .limit(limit ? parseInt(limit) : 50);
+      .limit(limit ? parseInt(limit) : 50)
+      .lean();
 
     res.status(200).json({ success: true, count: sales.length, data: sales });
   } catch (error) {
@@ -41,9 +66,11 @@ export const createSale = async (req, res) => {
   try {
     const { customer, items, paymentSplit, totalPurchasePrice } = req.body;
 
-    // Validate credit limit before processing
+    // Credit limit check
     if (paymentSplit.udhaar > 0 && customer) {
-      const dbCustomer = await Customer.findById(customer).session(session);
+      const dbCustomer = await Customer.findById(customer)
+        .session(session)
+        .lean();
       if (dbCustomer && dbCustomer.creditLimit > 0) {
         const projectedUdhaar = dbCustomer.totalUdhaar + paymentSplit.udhaar;
         if (projectedUdhaar > dbCustomer.creditLimit) {
@@ -51,7 +78,7 @@ export const createSale = async (req, res) => {
           session.endSession();
           return res.status(400).json({
             success: false,
-            message: `Credit limit exceeded! ${dbCustomer.name} can only take ₹${dbCustomer.creditLimit - dbCustomer.totalUdhaar} more on credit.`,
+            message: `Credit limit exceeded!`,
           });
         }
       }
@@ -60,14 +87,23 @@ export const createSale = async (req, res) => {
     let totalAmount = 0;
     let calculatedPurchasePrice = 0;
 
-    // Stock deduction
-    for (let orderItem of items) {
-      const item = await Item.findOne({
-        _id: orderItem.itemId,
-        shop: req.shop.id,
-      }).session(session);
+    // STEP 1: Fetch all items in ONE query
+    const itemIds = items.map((i) => i.itemId);
+    const dbItems = await Item.find({
+      _id: { $in: itemIds },
+      shop: req.shop.id,
+    }).session(session);
 
-      if (!item) throw new Error(`Item not found in your inventory.`);
+    // STEP 2: Create map for O(1) lookup
+    const itemMap = {};
+    dbItems.forEach((item) => {
+      itemMap[item._id.toString()] = item;
+    });
+
+    // STEP 3: Loop WITHOUT individual DB calls
+    for (let orderItem of items) {
+      const item = itemMap[orderItem.itemId];
+      if (!item) throw new Error(`Item not found`);
 
       const batch = item.batches.id(orderItem.batchId);
       if (!batch || batch.quantity < orderItem.quantity) {
@@ -75,29 +111,28 @@ export const createSale = async (req, res) => {
       }
 
       batch.quantity -= orderItem.quantity;
-      await item.save({ session });
-
       totalAmount += orderItem.sellingPrice * orderItem.quantity;
       calculatedPurchasePrice +=
         (orderItem.purchasePrice || batch.purchasePrice || 0) *
         orderItem.quantity;
     }
 
+    // STEP 4: Save all items in parallel
+    await Promise.all(dbItems.map((item) => item.save({ session })));
+
     // Payment validation
     const totalPaid =
       (paymentSplit.cash || 0) +
       (paymentSplit.upi || 0) +
       (paymentSplit.udhaar || 0);
+
     if (Math.round(totalPaid * 100) !== Math.round(totalAmount * 100)) {
-      throw new Error(
-        `Payment split (₹${totalPaid}) doesn't match total (₹${totalAmount}).`,
-      );
+      throw new Error(`Payment mismatch`);
     }
 
     const finalPurchasePrice = totalPurchasePrice || calculatedPurchasePrice;
     const profit = totalAmount - finalPurchasePrice;
 
-    
     const sale = new Sale({
       shop: req.shop.id,
       customer: customer || null,
@@ -112,22 +147,14 @@ export const createSale = async (req, res) => {
       totalAmount,
       totalPurchasePrice: finalPurchasePrice,
       profit,
-      paymentSplit: {
-        cash: paymentSplit.cash || 0,
-        upi: paymentSplit.upi || 0,
-        udhaar: paymentSplit.udhaar || 0,
-      },
+      paymentSplit,
     });
 
     await sale.save({ session });
 
     // Khata update
-    if (paymentSplit.udhaar > 0) {
-      if (!customer) throw new Error("Customer is required for Udhaar sales.");
-
+    if (paymentSplit.udhaar > 0 && customer) {
       const dbCustomer = await Customer.findById(customer).session(session);
-      if (!dbCustomer) throw new Error("Customer not found.");
-
       dbCustomer.totalUdhaar += paymentSplit.udhaar;
       dbCustomer.khataHistory.push({
         transactionType: "GIVEN_UDHAAR",
@@ -139,6 +166,12 @@ export const createSale = async (req, res) => {
 
     await session.commitTransaction();
     session.endSession();
+
+    // Invalidate related caches after a sale
+    cache.invalidate(`sales:${req.shop.id}`);
+    cache.invalidate(`items:${req.shop.id}`);
+    cache.invalidate(`dashboard:${req.shop.id}`);
+    if (customer) cache.invalidate(`customers:${req.shop.id}`);
 
     res.status(201).json({
       success: true,

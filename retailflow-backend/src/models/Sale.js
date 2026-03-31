@@ -51,4 +51,5 @@ saleSchema.pre("save", function (next) {
 saleSchema.index({ shop: 1, createdAt: -1 });
 saleSchema.index({ shop: 1, customer: 1 });
 
+
 export default mongoose.model("Sale", saleSchema);

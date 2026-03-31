@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import { useOutletContext } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import {
   AreaChart,
   Area,
@@ -28,7 +27,7 @@ const StatCard = ({ label, value, sub, color = "indigo", icon: Icon }) => {
     amber: "text-amber-400 bg-amber-500/10 border-amber-500/20",
   };
   return (
-    <div className="bg-[#111827] border border-slate-800 rounded-2xl p-5 flex flex-col justify-between min-h-27.5">
+    <div className="bg-[#111113] border border-slate-800 rounded-2xl p-5 flex flex-col justify-between min-h-27.5">
       <div className="flex items-center justify-between mb-3">
         <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
           {label}
@@ -82,7 +81,6 @@ const AiInsightText = ({ text, isError }) => {
 };
 
 const DashboardHome = () => {
-  const { t } = useTranslation();
   const { items, sales, customers } = useOutletContext();
 
   const [dashStats, setDashStats] = useState(null);
@@ -208,7 +206,8 @@ ${JSON.stringify(summary, null, 2)}`;
         );
       } else {
         setAiInsight(
-          t("couldNotLoadAI") || "Could not load AI insight right now.",
+          // eslint-disable-next-line no-constant-binary-expression
+          "Could Not Load AI" || "Could not load AI insight right now.",
         );
       }
     } finally {
@@ -224,7 +223,6 @@ ${JSON.stringify(summary, null, 2)}`;
     lowStockItems.length,
     chartData,
     dashStats,
-    t,
   ]);
 
   useEffect(() => {
@@ -239,30 +237,30 @@ ${JSON.stringify(summary, null, 2)}`;
       {/* KPI Cards */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
         <StatCard
-          label={t("todaysRevenue")}
+          label={"Todays Revenue"}
           value={fmt(todayRevenue)}
-          sub={t("salesToday")}
+          sub={"Sales Today"}
           color="indigo"
           icon={TrendingUp}
         />
         <StatCard
-          label={t("todaysProfit")}
+          label={"Todays Profit"}
           value={fmt(todayProfit)}
-          sub={t("afterPurchaseCost")}
+          sub={"After Purchase Cost"}
           color="emerald"
           icon={TrendingUp}
         />
         <StatCard
-          label={t("totalUdhaar")}
+          label={"Total Udhaar"}
           value={fmt(totalUdhaar)}
-          sub={`${dueCustomers.length} ${t("customers")}`}
+          sub={`${dueCustomers.length} ${"Customers"}`}
           color="rose"
           icon={Users}
         />
         <StatCard
-          label={t("lowStock")}
+          label={"Low Stock"}
           value={lowStockItems.length}
-          sub={t("itemsNearAlert")}
+          sub={"Items Near Alert"}
           color="amber"
           icon={AlertTriangle}
         />
@@ -276,17 +274,17 @@ ${JSON.stringify(summary, null, 2)}`;
               <Sparkles size={14} className="text-indigo-400" />
             </div>
             <p className="font-black text-white text-sm">
-              {t("aiBusinessInsight")}
+              {"AI Business Insight"}
             </p>
             <span className="text-[10px] font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full uppercase tracking-wider">
-              {t("live")}
+              {"Live"}
             </span>
           </div>
           <button
             onClick={fetchAiInsight}
             disabled={aiLoading}
             className="p-1.5 text-slate-400 hover:text-indigo-400 transition-colors disabled:opacity-40"
-            title={t("refreshInsight")}
+            title={"Refresh Insight"}
           >
             <RefreshCw size={14} className={aiLoading ? "animate-spin" : ""} />
           </button>
@@ -299,15 +297,15 @@ ${JSON.stringify(summary, null, 2)}`;
           </div>
         ) : (
           <AiInsightText
-            text={aiInsight || t("analyzingData")}
+            text={aiInsight || "Analyzing Data"}
             isError={aiError}
           />
         )}
       </div>
 
       {/* Revenue & Profit Chart */}
-      <div className="bg-[#111827] border border-slate-800 rounded-2xl p-5">
-        <h2 className="font-bold text-white mb-4">{t("revenueVsProfit")}</h2>
+      <div className="bg-[#111113] border border-slate-800 rounded-2xl p-5">
+        <h2 className="font-bold text-white mb-4">{"Revenue Vs Profit"}</h2>
         <div className="h-52">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
@@ -338,7 +336,7 @@ ${JSON.stringify(summary, null, 2)}`;
               />
               <Tooltip
                 contentStyle={{
-                  background: "#0f172a",
+                  background: "#111113",
                   border: "1px solid #1e293b",
                   borderRadius: 12,
                   fontSize: 12,
@@ -371,14 +369,14 @@ ${JSON.stringify(summary, null, 2)}`;
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Top Selling */}
-        <div className="bg-[#111827] border border-slate-800 rounded-2xl p-5">
+        <div className="bg-[#111113] border border-slate-800 rounded-2xl p-5">
           <h2 className="font-bold text-white mb-4 flex items-center gap-2">
             <Package size={16} className="text-indigo-400" />{" "}
-            {t("topSellingItems")}
+            {"Top Selling Items"}
           </h2>
           {topSelling.length === 0 ? (
             <p className="text-slate-500 text-sm text-center py-6">
-              {t("noSalesYet")}
+              {"No Sales Yet"}
             </p>
           ) : (
             <div className="space-y-3">
@@ -401,7 +399,7 @@ ${JSON.stringify(summary, null, 2)}`;
                     </div>
                   </div>
                   <span className="text-xs font-black text-slate-300">
-                    {item.qty} {t("sold")}
+                    {item.qty} {"Sold"}
                   </span>
                 </div>
               ))}
@@ -410,14 +408,14 @@ ${JSON.stringify(summary, null, 2)}`;
         </div>
 
         {/* Due Customers */}
-        <div className="bg-[#111827] border border-slate-800 rounded-2xl p-5">
+        <div className="bg-[#111113] border border-slate-800 rounded-2xl p-5">
           <h2 className="font-bold text-white mb-4 flex items-center gap-2">
             <Users size={16} className="text-rose-400" />{" "}
-            {t("topUdhaarCustomers")}
+            {"Top Udhaar Customers"}
           </h2>
           {dueCustomers.length === 0 ? (
             <p className="text-slate-500 text-sm text-center py-6">
-              {t("noOutstandingUdhaar")}
+              {"No Outstanding Udhaar"}
             </p>
           ) : (
             <div className="space-y-3">
@@ -436,7 +434,7 @@ ${JSON.stringify(summary, null, 2)}`;
                     </p>
                     {c.creditLimit > 0 && (
                       <p className="text-xs text-slate-500">
-                        {t("limit")}: {fmt(c.creditLimit)}
+                        {"Limit"}: {fmt(c.creditLimit)}
                       </p>
                     )}
                   </div>
@@ -451,8 +449,8 @@ ${JSON.stringify(summary, null, 2)}`;
       {lowStockItems.length > 0 && (
         <div className="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-5">
           <h2 className="font-bold text-amber-400 mb-4 flex items-center gap-2">
-            <AlertTriangle size={16} /> {t("lowStockWarning")} (
-            {lowStockItems.length} {t("items")})
+            <AlertTriangle size={16} /> {"Low Stock Warning"} (
+            {lowStockItems.length} {"Items"})
           </h2>
           <div className="grid sm:grid-cols-2 gap-3">
             {lowStockItems.slice(0, 6).map((item) => {
@@ -461,13 +459,13 @@ ${JSON.stringify(summary, null, 2)}`;
               return (
                 <div
                   key={item._id}
-                  className="flex items-center justify-between bg-[#111827] px-4 py-3 rounded-xl border border-slate-800"
+                  className="flex items-center justify-between bg-[#111113] px-4 py-3 rounded-xl border border-slate-800"
                 >
                   <p className="text-sm font-bold text-white truncate">
                     {item.name}
                   </p>
                   <span className="text-xs font-black text-amber-400 ml-2 shrink-0">
-                    {qty} {t("left")}
+                    {qty} {"Left"}
                   </span>
                 </div>
               );

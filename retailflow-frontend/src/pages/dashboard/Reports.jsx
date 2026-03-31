@@ -119,14 +119,14 @@ const Reports = () => {
           </div>
           <div>
             <h1 className="text-2xl font-black tracking-tight">
-              {t("  RetailFlowAnalytics")}
+              {t("  Retail Flow Analytics")}
             </h1>
             <p className="text-sm text-slate-400 font-medium">
-              {t("performanceInsights")}
+              {t("Performance Insights")}
             </p>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2 bg-[#111827] p-1.5 rounded-2xl border border-slate-800 shadow-inner">
+        <div className="flex flex-wrap items-center gap-2 bg-[#111113] p-1.5 rounded-2xl border border-slate-800 shadow-inner">
           {["7d", "30d", "6m", "1y", "custom"].map((r) => (
             <button
               key={r}
@@ -145,42 +145,42 @@ const Reports = () => {
             type="date"
             value={customStart}
             onChange={(e) => setCustomStart(e.target.value)}
-            className="bg-[#111827] border border-slate-800 p-3 rounded-xl text-sm font-bold text-white outline-none focus:border-indigo-500"
+            className="bg-[#111113] border border-slate-800 p-3 rounded-xl text-sm font-bold text-white outline-none focus:border-indigo-500"
           />
           <span className="text-slate-600 font-black">TO</span>
           <input
             type="date"
             value={customEnd}
             onChange={(e) => setCustomEnd(e.target.value)}
-            className="bg-[#111827] border border-slate-800 p-3 rounded-xl text-sm font-bold text-white outline-none focus:border-indigo-500"
+            className="bg-[#111113] border border-slate-800 p-3 rounded-xl text-sm font-bold text-white outline-none focus:border-indigo-500"
           />
         </div>
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
         <Card
-          title={t("revenue")}
+          title={t("Revenue")}
           value={formatCurrency(stats.revenue)}
           icon={IndianRupee}
           color="text-indigo-400"
           bg="bg-indigo-500/10"
         />
         <Card
-          title={t("netProfit")}
+          title={t("Net Profit")}
           value={formatCurrency(stats.profit)}
           icon={TrendingUp}
           color="text-emerald-400"
           bg="bg-emerald-500/10"
         />
         <Card
-          title={t("gstTax")}
+          title={t("Gst Tax")}
           value={formatCurrency(stats.gst)}
           icon={Receipt}
           color="text-amber-400"
           bg="bg-amber-500/10"
         />
         <Card
-          title={t("pendingUdhaar")}
+          title={t("Pending Udhaar")}
           value={formatCurrency(stats.udhaar)}
           icon={CreditCard}
           color="text-rose-400"
@@ -190,7 +190,7 @@ const Reports = () => {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2">
-          <ChartBox title={t("revenueVsProfit")}>
+          <ChartBox title={t("Revenue Vs Profit")}>
             {chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height={350}>
                 <AreaChart data={chartData}>
@@ -250,7 +250,7 @@ const Reports = () => {
             )}
           </ChartBox>
         </div>
-        <ChartBox title={t("paymentSplitTitle")}>
+        <ChartBox title={t("Payment Split Title")}>
           {paymentData.some((p) => p.value > 0) ? (
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={paymentData}>
@@ -295,7 +295,7 @@ const Reports = () => {
 };
 
 const Card = ({ title, value, icon: Icon, color, bg }) => (
-  <div className="bg-[#111827] border border-slate-800/50 rounded-4xl p-7 shadow-2xl flex items-center justify-between hover:border-indigo-500/40 transition-all group">
+  <div className="bg-[#111113] border border-slate-800/50 rounded-4xl p-7 shadow-2xl flex items-center justify-between hover:border-indigo-500/40 transition-all group">
     <div>
       <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-2">
         {title}
@@ -311,7 +311,7 @@ const Card = ({ title, value, icon: Icon, color, bg }) => (
 );
 
 const ChartBox = ({ title, children }) => (
-  <div className="bg-[#111827] border border-slate-800/50 rounded-4xl p-8 shadow-2xl h-full flex flex-col">
+  <div className="bg-[#111113] border border-slate-800/50 rounded-4xl p-8 shadow-2xl h-full flex flex-col">
     <h2 className="text-xs font-black mb-8 text-slate-400 uppercase tracking-widest">
       {title}
     </h2>

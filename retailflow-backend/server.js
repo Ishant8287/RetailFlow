@@ -4,6 +4,7 @@ import connectDB from "./src/config/db.js";
 import app from "./app.js";
 import { startReminderCron } from "./src/utils/reminderCron.js";
 
+
 connectDB();
 
 // Start WhatsApp reminder scheduler

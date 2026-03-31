@@ -9,7 +9,7 @@ function Hero() {
   return (
     <section
       id="home"
-      className="py-12 sm:py-20 md:py-24 bg-[#0b1120] overflow-hidden"
+      className="py-12 sm:py-20 md:py-24 bg-[#09090b] overflow-hidden"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
         <div className="flex-1 space-y-6 text-center lg:text-left">

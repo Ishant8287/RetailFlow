@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 
+
 // Routes
 import aiRoutes from "./src/routes/ai.routes.js";
 import authRoutes from "./src/routes/auth.routes.js";

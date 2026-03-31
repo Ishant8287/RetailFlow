@@ -9,14 +9,11 @@ import {
   Clock,
   ShoppingBag,
 } from "lucide-react";
-import { useTranslation } from "react-i18next";
 import API from "../../api/axiosInstance";
 import jsPDF from "jspdf";
 
 const Khata = () => {
-  const { t } = useTranslation();
   const { customers, setCustomers, shopProfile } = useOutletContext();
-
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [paymentAmount, setPaymentAmount] = useState("");
@@ -49,8 +46,8 @@ const Khata = () => {
     try {
       const res = await API.get(`/customers/${customer._id}/history`);
       setPurchaseHistory(res.data.data);
-    // eslint-disable-next-line no-empty
-    } catch {
+    } catch (err) {
+      console.error("Failed to load customer history", err);
     } finally {
       setLoadingHistory(false);
     }
@@ -161,10 +158,10 @@ const Khata = () => {
   return (
     <div className="text-white min-h-screen pb-24">
       <div className="mb-6">
-        <h1 className="text-2xl font-black tracking-tight">{t("khataBook")}</h1>
-        <p className="text-sm text-slate-400 mt-0.5">{t("trackCredit")}</p>
+        <h1 className="text-2xl font-black tracking-tight">Khata Book</h1>
+        <p className="text-sm text-slate-400 mt-0.5">Track Credit</p>
         <div className="mt-4 inline-flex items-center gap-2 bg-rose-500/10 border border-rose-500/20 text-rose-400 px-4 py-2 rounded-xl text-sm font-bold">
-          {t("totalOutstanding")}: ₹
+          Total Outstanding: ₹
           {new Intl.NumberFormat("en-IN").format(totalOutstanding)}
         </div>
       </div>
@@ -173,23 +170,23 @@ const Khata = () => {
         <div className="flex-1 space-y-3">
           <input
             type="text"
-            placeholder={t("searchCustomer")}
+            placeholder="Search Customer"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-3 bg-[#111827] border border-slate-800 rounded-xl text-white outline-none focus:border-indigo-500"
+            className="w-full px-4 py-3 bg-[#111113] border border-slate-800 rounded-xl text-white outline-none focus:border-indigo-500"
           />
 
           {filtered.length === 0 ? (
             <div className="text-center py-16 text-slate-500">
               <Users size={48} className="mx-auto mb-4 opacity-20" />
-              <p className="font-bold">{t("noOutstandingUdhaar")}</p>
+              <p className="font-bold">No Outstanding Udhaar</p>
             </div>
           ) : (
             filtered.map((customer) => (
               <div
                 key={customer._id}
                 onClick={() => handleSelectCustomer(customer)}
-                className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all ${selectedCustomer?._id === customer._id ? "bg-indigo-500/10 border-indigo-500/30" : "bg-[#111827] border-slate-800 hover:border-slate-600"}`}
+                className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all ${selectedCustomer?._id === customer._id ? "bg-indigo-500/10 border-indigo-500/30" : "bg-[#111113] border-slate-800 hover:border-slate-600"}`}
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center font-black text-indigo-400">
@@ -200,7 +197,7 @@ const Khata = () => {
                     <p className="text-xs text-slate-500">{customer.phone}</p>
                     {customer.creditLimit > 0 && (
                       <p className="text-xs text-amber-400 mt-0.5">
-                        {t("limit")}: ₹
+                        Limit: ₹
                         {new Intl.NumberFormat("en-IN").format(
                           customer.creditLimit,
                         )}
@@ -235,7 +232,7 @@ const Khata = () => {
         </div>
 
         {selectedCustomer && (
-          <div className="lg:w-96 bg-[#111827] border border-slate-800 rounded-2xl p-5 space-y-5 h-fit lg:sticky lg:top-20">
+          <div className="lg:w-96 bg-[#111113] border border-slate-800 rounded-2xl p-5 space-y-5 h-fit lg:sticky lg:top-20">
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="font-black text-white text-lg">
@@ -255,7 +252,7 @@ const Khata = () => {
 
             <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-4 text-center">
               <p className="text-xs font-bold text-slate-400 uppercase mb-1">
-                {t("outstanding")}
+                Outstanding
               </p>
               <p className="text-3xl font-black text-rose-400">
                 ₹
@@ -265,7 +262,7 @@ const Khata = () => {
               </p>
               {selectedCustomer.creditLimit > 0 && (
                 <p className="text-xs text-slate-400 mt-1">
-                  {t("creditLimit")}: ₹
+                  Credit Limit: ₹
                   {new Intl.NumberFormat("en-IN").format(
                     selectedCustomer.creditLimit,
                   )}
@@ -275,28 +272,28 @@ const Khata = () => {
 
             <div className="space-y-3">
               <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                {t("receivePayment")}
+                Receive Payment
               </h4>
               <input
                 type="number"
-                placeholder={t("amountReceived")}
+                placeholder="Amount Received"
                 value={paymentAmount}
                 onChange={(e) => setPaymentAmount(e.target.value)}
-                className="w-full px-4 py-3 bg-[#0b1120] border border-slate-700 rounded-xl text-white outline-none focus:border-emerald-500"
+                className="w-full px-4 py-3 bg-[#09090b] border border-slate-700 rounded-xl text-white outline-none focus:border-emerald-500"
               />
               <input
                 type="text"
-                placeholder={t("note")}
+                placeholder="Note (Optional)"
                 value={paymentNote}
                 onChange={(e) => setPaymentNote(e.target.value)}
-                className="w-full px-4 py-3 bg-[#0b1120] border border-slate-700 rounded-xl text-white outline-none focus:border-emerald-500"
+                className="w-full px-4 py-3 bg-[#09090b] border border-slate-700 rounded-xl text-white outline-none focus:border-emerald-500"
               />
               <button
                 onClick={handleReceivePayment}
                 disabled={isSubmitting || !paymentAmount}
                 className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl disabled:opacity-40 transition-all"
               >
-                {isSubmitting ? t("processing") : t("recordPayment")}
+                {isSubmitting ? "Processing..." : "Record Payment"}
               </button>
             </div>
 
@@ -305,51 +302,51 @@ const Khata = () => {
                 onClick={() => handleWhatsApp(selectedCustomer)}
                 className="flex items-center gap-2 justify-center py-2.5 bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 rounded-xl text-sm font-bold hover:bg-emerald-600/30"
               >
-                <MessageCircle size={15} /> {t("whatsapp")}
+                <MessageCircle size={15} /> WhatsApp
               </button>
               <button
                 onClick={handlePDFStatement}
                 className="flex items-center gap-2 justify-center py-2.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-xl text-sm font-bold hover:bg-indigo-500/20"
               >
-                {t("pdfStatement")}
+                PDF Statement
               </button>
             </div>
 
             <div className="space-y-2 pt-2 border-t border-slate-800">
               <h4 className="text-xs font-bold text-slate-400 uppercase flex items-center gap-1">
-                <Clock size={12} /> {t("scheduleReminder")}
+                <Clock size={12} /> Schedule Reminder
               </h4>
               <input
                 type="date"
                 value={reminderDate}
                 onChange={(e) => setReminderDate(e.target.value)}
-                className="w-full px-3 py-2 bg-[#0b1120] border border-slate-700 rounded-xl text-white text-sm outline-none"
+                className="w-full px-3 py-2 bg-[#09090b] border border-slate-700 rounded-xl text-white text-sm outline-none"
               />
               <button
                 onClick={handleScheduleReminder}
                 className="w-full py-2.5 bg-slate-800 text-slate-300 font-bold rounded-xl text-sm hover:bg-slate-700"
               >
-                {t("setReminder")}
+                Set Reminder
               </button>
             </div>
 
             <div className="pt-2 border-t border-slate-800">
               <h4 className="text-xs font-bold text-slate-400 uppercase flex items-center gap-2 mb-3">
-                <ShoppingBag size={12} /> {t("purchaseHistory")}
+                <ShoppingBag size={12} /> Purchase History
               </h4>
               {loadingHistory ? (
-                <p className="text-xs text-slate-500">{t("loading")}</p>
+                <p className="text-xs text-slate-500">Loading...</p>
               ) : purchaseHistory?.topItems?.length > 0 ? (
                 <div className="space-y-2">
                   <p className="text-xs text-slate-500">
-                    {purchaseHistory.totalVisits} {t("visits")} · ₹
+                    {purchaseHistory.totalVisits} Visits · ₹
                     {new Intl.NumberFormat("en-IN").format(
                       purchaseHistory.totalSpent,
                     )}{" "}
-                    {t("totalSpent")}
+                    Total Spent
                   </p>
                   <p className="text-xs font-bold text-slate-400">
-                    {t("buysmost")}
+                    Most Bought Items
                   </p>
                   {purchaseHistory.topItems.map((item, i) => (
                     <div
@@ -364,19 +361,17 @@ const Khata = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-slate-500">{t("noData")}</p>
+                <p className="text-xs text-slate-500">No Purchase History</p>
               )}
             </div>
 
             <div className="pt-2 border-t border-slate-800">
               <h4 className="text-xs font-bold text-slate-400 uppercase mb-3">
-                {t("transactionHistory")}
+                Transaction History
               </h4>
               <div className="space-y-2 max-h-48 overflow-y-auto">
                 {selectedCustomer.khataHistory?.length === 0 ? (
-                  <p className="text-xs text-slate-500">
-                    {t("noTransactions")}
-                  </p>
+                  <p className="text-xs text-slate-500">No Transactions Yet</p>
                 ) : (
                   [...(selectedCustomer.khataHistory || [])]
                     .reverse()
@@ -390,8 +385,8 @@ const Khata = () => {
                             className={`font-bold ${entry.transactionType === "PAYMENT_RECEIVED" ? "text-emerald-400" : "text-rose-400"}`}
                           >
                             {entry.transactionType === "PAYMENT_RECEIVED"
-                              ? t("paymentReceived")
-                              : t("udhaarGiven")}
+                              ? "Payment Received"
+                              : "Udhaar Given"}
                           </p>
                           <p className="text-slate-500">{entry.description}</p>
                         </div>

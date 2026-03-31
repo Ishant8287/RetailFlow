@@ -2,11 +2,10 @@ import { useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { toast } from "sonner";
 import { Camera } from "lucide-react";
-import { useTranslation } from "react-i18next";
 import API from "../../api/axiosInstance";
+import { Link } from "react-router-dom";
 
 const Profile = () => {
-  const { t } = useTranslation();
   const { shopProfile, setShopProfile } = useOutletContext();
   const [uploading, setUploading] = useState(false);
 
@@ -51,14 +50,14 @@ const Profile = () => {
     <div className="max-w-lg mx-auto pb-24">
       <div className="mb-8">
         <h1 className="text-2xl font-black text-white tracking-tight">
-          {t("profile")}
+          {"Profile"}
         </h1>
         <p className="text-slate-400 mt-1 text-sm">
           Your account details and profile photo.
         </p>
       </div>
 
-      <div className="bg-[#111827] border border-slate-800 rounded-2xl p-8 text-center">
+      <div className="bg-[#111113] border border-slate-800 rounded-2xl p-8 text-center">
         <div className="relative inline-block mb-6">
           <div className="w-24 h-24 rounded-2xl bg-indigo-500/20 border-2 border-indigo-500/30 flex items-center justify-center text-indigo-400 font-black text-3xl overflow-hidden">
             {avatarUrl ? (
@@ -97,19 +96,19 @@ const Profile = () => {
 
         <div className="mt-8 grid grid-cols-2 gap-4 text-left">
           {[
-            { label: t("email"), value: shopProfile?.email },
-            { label: t("phone"), value: shopProfile?.phone },
-            { label: t("gstin"), value: shopProfile?.gstin || "—" },
-            { label: t("upiId"), value: shopProfile?.upiId || "—" },
+            { label: "Email", value: shopProfile?.email },
+            { label: "Phone", value: shopProfile?.phone },
+            { label: "Gstin", value: shopProfile?.gstin || "—" },
+            { label: "Upi Id", value: shopProfile?.upiId || "—" },
             {
-              label: t("businessType"),
+              label: "Business Type",
               value: shopProfile?.businessType || "Retail",
             },
-            { label: t("address"), value: shopProfile?.address || "—" },
+            { label: "Address", value: shopProfile?.address || "—" },
           ].map(({ label, value }) => (
             <div
               key={label}
-              className="bg-[#0b1120] p-4 rounded-xl border border-slate-800"
+              className="bg-[#09090b] p-4 rounded-xl border border-slate-800"
             >
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
                 {label}
@@ -121,7 +120,13 @@ const Profile = () => {
 
         <p className="text-slate-600 text-xs mt-6">
           To edit profile details, go to{" "}
-          <span className="text-indigo-400 font-bold">{t("settings")}</span>.
+          <Link
+            to="/dashboard/settings"
+            className="text-indigo-400 font-bold hover:text-indigo-300 underline transition-colors"
+          >
+            {"Settings"}
+          </Link>
+          .
         </p>
       </div>
     </div>

@@ -5,7 +5,7 @@ import Footer from "../components/layout/Footer";
 import { CheckCircle2, BookX } from "lucide-react";
 
 const ProblemSection = () => (
-  <section className="py-16 bg-[#0f172a] border-y border-slate-800">
+  <section className="py-16 bg-[#111113] border-y border-slate-800">
     <div className="max-w-4xl mx-auto px-4 text-center">
       <div className="w-16 h-16 bg-rose-500/20 text-rose-400 rounded-2xl flex items-center justify-center mx-auto mb-6 transform -rotate-6">
         <BookX size={32} />
@@ -23,7 +23,7 @@ const ProblemSection = () => (
 );
 
 const Testimonial = () => (
-  <section className="py-20 bg-[#0b1120]">
+  <section className="py-20 bg-[#09090b]">
     <div className="max-w-4xl mx-auto px-4 text-center">
       <h3 className="text-2xl md:text-3xl font-bold text-white mb-8 leading-snug italic">
         "RetailFlow completely changed how I run my business. Recovering udhaar
@@ -45,7 +45,7 @@ const Testimonial = () => (
 const Pricing = () => (
   <section
     id="pricing"
-    className="py-24 bg-[#0f172a] border-t border-slate-800"
+    className="py-24 bg-[#111113] border-t border-slate-800"
   >
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <h2 className="text-3xl md:text-5xl font-black text-white mb-4">
@@ -97,7 +97,7 @@ const Pricing = () => (
 
 function LandingPage() {
   return (
-    <div className="bg-[#0b1120] min-h-screen overflow-x-hidden">
+    <div className="bg-[#09090b] min-h-screen overflow-x-hidden">
       <Hero />
       <ProblemSection />
       <Features />

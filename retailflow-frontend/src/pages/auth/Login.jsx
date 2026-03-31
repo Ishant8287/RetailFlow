@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
-import { useTranslation } from "react-i18next";
 import {
   sendLoginOtp,
   verifyLoginOtp,
@@ -21,7 +20,6 @@ import {
 import Navbar from "../../components/layout/Navbar";
 
 const Login = () => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loginType, setLoginType] = useState("owner");
@@ -178,8 +176,8 @@ const Login = () => {
     return (
       <>
         <Navbar />
-        <div className="min-h-screen flex items-center bg-[#0b1120] justify-center px-4 pt-20">
-          <div className="bg-[#111827] border w-full max-w-md p-8 shadow-2xl border-slate-800 rounded-3xl">
+        <div className="min-h-screen flex items-center bg-[#09090b] justify-center px-4 pt-20">
+          <div className="bg-[#111113] border w-full max-w-md p-8 shadow-2xl border-slate-800 rounded-3xl">
             <button
               onClick={() => {
                 setShowForgot(false);
@@ -208,7 +206,7 @@ const Login = () => {
                   value={forgotEmail}
                   onChange={(e) => setForgotEmail(e.target.value)}
                   placeholder="Your registered email"
-                  className="w-full px-4 py-4 rounded-xl bg-[#0b1120] border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-medium"
+                  className="w-full px-4 py-4 rounded-xl bg-[#09090b] border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-medium"
                   autoFocus
                 />
                 <button
@@ -239,7 +237,7 @@ const Login = () => {
                       setForgotOtp(e.target.value.replace(/\D/g, ""))
                     }
                     placeholder="••••••"
-                    className="w-full text-center tracking-[1em] px-4 py-4 rounded-xl bg-[#0b1120] border border-slate-700 text-white text-xl font-black focus:outline-none focus:border-indigo-500"
+                    className="w-full text-center tracking-[1em] px-4 py-4 rounded-xl bg-[#09090b] border border-slate-700 text-white text-xl font-black focus:outline-none focus:border-indigo-500"
                     autoFocus
                   />
                 </div>
@@ -248,14 +246,14 @@ const Login = () => {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="New password (min 6 chars)"
-                  className="w-full px-4 py-4 rounded-xl bg-[#0b1120] border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-medium"
+                  className="w-full px-4 py-4 rounded-xl bg-[#09090b] border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-medium"
                 />
                 <input
                   type="password"
                   value={confirmNewPassword}
                   onChange={(e) => setConfirmNewPassword(e.target.value)}
                   placeholder="Confirm new password"
-                  className="w-full px-4 py-4 rounded-xl bg-[#0b1120] border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-medium"
+                  className="w-full px-4 py-4 rounded-xl bg-[#09090b] border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-medium"
                 />
                 <button
                   type="submit"
@@ -276,10 +274,10 @@ const Login = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen flex items-center bg-[#0b1120] justify-center px-4 pt-20">
-        <div className="bg-[#111827] border w-full max-w-md p-8 shadow-2xl border-slate-800 rounded-3xl">
+      <div className="min-h-screen flex items-center bg-[#09090b] justify-center px-4 pt-20">
+        <div className="bg-[#111113] border w-full max-w-md p-8 shadow-2xl border-slate-800 rounded-3xl">
           {/* Owner / Staff Toggle */}
-          <div className="flex p-1 bg-[#0b1120] rounded-xl border border-slate-800 mb-6">
+          <div className="flex p-1 bg-[#09090b] rounded-xl border border-slate-800 mb-6">
             <button
               onClick={() => {
                 setLoginType("owner");
@@ -287,23 +285,23 @@ const Login = () => {
               }}
               className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${loginType === "owner" ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-white"}`}
             >
-              {t("ownerLogin")}
+              {"OwnerLogin"}
             </button>
             <button
               onClick={() => setLoginType("staff")}
               className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${loginType === "staff" ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-white"}`}
             >
-              {t("staffLogin")}
+              {"Staff Login"}
             </button>
           </div>
 
           <div className="text-center mb-6">
             <h2 className="text-2xl font-black text-white">
               {loginType === "staff"
-                ? t("staffAccess")
+                ? "Staff Access"
                 : step === 2
-                  ? t("verifyOtp")
-                  : t("retailflowLogin")}
+                  ? "Verify Otp"
+                  : "RetailFlow Login"}
             </h2>
           </div>
 
@@ -315,7 +313,7 @@ const Login = () => {
                 value={staffPhone}
                 onChange={(e) => setStaffPhone(e.target.value)}
                 placeholder="10-digit phone number"
-                className="w-full px-4 py-4 rounded-xl bg-[#0b1120] border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-medium"
+                className="w-full px-4 py-4 rounded-xl bg-[#09090b] border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-medium"
               />
               <input
                 type="password"
@@ -323,14 +321,14 @@ const Login = () => {
                 onChange={(e) => setStaffPin(e.target.value.replace(/\D/g, ""))}
                 placeholder="Enter your PIN"
                 maxLength={6}
-                className="w-full px-4 py-4 rounded-xl bg-[#0b1120] border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-medium tracking-widest text-center text-xl"
+                className="w-full px-4 py-4 rounded-xl bg-[#09090b] border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-medium tracking-widest text-center text-xl"
               />
               <button
                 type="submit"
                 disabled={loading}
                 className="w-full py-4 rounded-xl font-black bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg active:scale-95 transition-all disabled:opacity-50"
               >
-                {loading ? t("verifying") : t("loginAsStaff")}
+                {loading ? "Verifying" : "Login As Staff"}
               </button>
             </form>
           )}
@@ -339,7 +337,7 @@ const Login = () => {
           {loginType === "owner" && step === 1 && (
             <>
               {/* Password / OTP Toggle */}
-              <div className="flex p-1 bg-[#0b1120] rounded-xl border border-slate-800 mb-6">
+              <div className="flex p-1 bg-[#09090b] rounded-xl border border-slate-800 mb-6">
                 <button
                   type="button"
                   onClick={() => setOwnerMethod("password")}
@@ -364,7 +362,7 @@ const Login = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Your registered email"
-                    className="w-full px-4 py-4 rounded-xl bg-[#0b1120] border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-medium"
+                    className="w-full px-4 py-4 rounded-xl bg-[#09090b] border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-medium"
                     autoFocus
                   />
                   <input
@@ -372,7 +370,7 @@ const Login = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Your password"
-                    className="w-full px-4 py-4 rounded-xl bg-[#0b1120] border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-medium"
+                    className="w-full px-4 py-4 rounded-xl bg-[#09090b] border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-medium"
                   />
                   <button
                     type="submit"
@@ -400,7 +398,7 @@ const Login = () => {
               {/* OTP FORM */}
               {ownerMethod === "otp" && (
                 <form className="space-y-4" onSubmit={handleSendOtp}>
-                  <div className="flex p-1 bg-[#0b1120] rounded-xl border border-slate-800">
+                  <div className="flex p-1 bg-[#09090b] rounded-xl border border-slate-800">
                     {["email", "phone"].map((method) => (
                       <button
                         key={method}
@@ -416,7 +414,7 @@ const Login = () => {
                         ) : (
                           <Phone size={16} />
                         )}
-                        {method === "email" ? t("email") : t("mobile")}
+                        {method === "email" ? "Email" : "Mobile"}
                       </button>
                     ))}
                   </div>
@@ -429,7 +427,7 @@ const Login = () => {
                         ? "Your registered email"
                         : "10-digit mobile number"
                     }
-                    className="w-full px-4 py-4 rounded-xl bg-[#0b1120] border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-medium"
+                    className="w-full px-4 py-4 rounded-xl bg-[#09090b] border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-medium"
                     autoFocus
                   />
                   <button
@@ -438,10 +436,10 @@ const Login = () => {
                     className={`w-full flex items-center justify-center gap-2 py-4 rounded-xl font-black transition-all ${isValidContact() && !loading ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg active:scale-95" : "bg-slate-800 text-slate-500 cursor-not-allowed"}`}
                   >
                     {loading ? (
-                      t("sendingOtp")
+                      "Sending Otp"
                     ) : (
                       <>
-                        {t("getOtp")} <ArrowRight size={18} />
+                        {"Get Otp"} <ArrowRight size={18} />
                       </>
                     )}
                   </button>
@@ -463,7 +461,7 @@ const Login = () => {
                   value={otp}
                   onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
                   placeholder="••••••"
-                  className="w-full text-center tracking-[1em] px-4 py-4 rounded-xl bg-[#0b1120] border border-slate-700 text-white text-xl font-black focus:outline-none focus:border-indigo-500"
+                  className="w-full text-center tracking-[1em] px-4 py-4 rounded-xl bg-[#09090b] border border-slate-700 text-white text-xl font-black focus:outline-none focus:border-indigo-500"
                   autoFocus
                 />
               </div>
@@ -480,7 +478,7 @@ const Login = () => {
                   disabled={!isOtpValid || loading}
                   className={`flex-1 py-4 rounded-xl font-black transition-all ${isOtpValid && !loading ? "bg-emerald-600 hover:bg-emerald-500 text-white active:scale-95" : "bg-slate-800 text-slate-500 cursor-not-allowed"}`}
                 >
-                  {loading ? t("verifying") : "Verify & Login"}
+                  {loading ? "Verifying" : "Verify & Login"}
                 </button>
               </div>
             </form>
@@ -488,12 +486,12 @@ const Login = () => {
 
           {step === 1 && loginType === "owner" && (
             <p className="text-center text-sm font-bold text-slate-500 mt-8">
-              {t("newToRetailflow")}{" "}
+              {"New To Retailflow"}
               <Link
                 to="/signup"
                 className="text-indigo-400 hover:text-indigo-300 transition-colors"
               >
-                {t("createAccount")}
+                {"Create Account"}
               </Link>
             </p>
           )}

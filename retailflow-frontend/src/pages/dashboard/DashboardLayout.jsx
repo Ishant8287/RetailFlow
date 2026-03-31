@@ -61,7 +61,7 @@ const DashboardLayout = () => {
 
   if (isLoading) {
     return (
-      <div className="h-screen w-screen bg-[#0b1120] flex flex-col items-center justify-center text-white">
+      <div className="h-screen w-screen bg-[#09090b] flex flex-col items-center justify-center text-white">
         <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4" />
         <p className="font-bold text-slate-400 tracking-widest uppercase text-sm">
           Syncing RetailFlow...
@@ -71,7 +71,7 @@ const DashboardLayout = () => {
   }
 
   return (
-    <div className="flex h-screen bg-[#0b1120] text-white overflow-hidden">
+    <div className="flex h-screen bg-[#09090b] text-white overflow-hidden">
       <div className="h-full print:hidden">
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       </div>
@@ -79,7 +79,7 @@ const DashboardLayout = () => {
         <div className="print:hidden">
           <Topbar setSidebarOpen={setSidebarOpen} />
         </div>
-        <main className="flex-1 p-4 md:p-6 overflow-y-auto bg-[#0b1120]">
+        <main className="flex-1 p-4 md:p-6 overflow-y-auto bg-[#09090b]">
           <Outlet
             context={{
               items,

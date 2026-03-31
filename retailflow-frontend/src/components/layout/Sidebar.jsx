@@ -14,10 +14,8 @@ import {
   UserCog,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useTranslation } from "react-i18next";
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
-  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -25,61 +23,61 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
   const allNavItems = [
     {
-      name: t("dashboard"),
+      name: "Dashboard",
       path: "/dashboard",
       icon: LayoutDashboard,
       roles: ["owner", "manager", "cashier"],
     },
     {
-      name: t("inventory"),
+      name: "Inventory",
       path: "/dashboard/inventory",
       icon: PackageSearch,
       roles: ["owner", "manager"],
     },
     {
-      name: t("pos"),
+      name: "POS",
       path: "/dashboard/pos",
       icon: ShoppingCart,
       roles: ["owner", "manager", "cashier"],
     },
     {
-      name: t("khata"),
+      name: "Khata",
       path: "/dashboard/khata",
       icon: Users,
       roles: ["owner", "manager", "cashier"],
     },
     {
-      name: t("expenses"),
+      name: "Expenses",
       path: "/dashboard/expenses",
       icon: Wallet,
       roles: ["owner", "manager"],
     },
     {
-      name: t("suppliers"),
+      name: "Suppliers",
       path: "/dashboard/suppliers",
       icon: Truck,
       roles: ["owner", "manager"],
     },
     {
-      name: t("reports"),
+      name: "Reports",
       path: "/dashboard/reports",
       icon: FileText,
       roles: ["owner", "manager"],
     },
     {
-      name: t("stockAdjustment"),
+      name: "Stock Adjustment",
       path: "/dashboard/stock-adjustment",
       icon: Settings2,
       roles: ["owner", "manager"],
     },
     {
-      name: t("staff"),
+      name: "Staff",
       path: "/dashboard/staff",
       icon: UserCog,
       roles: ["owner"],
     },
     {
-      name: t("settings"),
+      name: "Settings",
       path: "/dashboard/settings",
       icon: Settings,
       roles: ["owner"],
@@ -92,7 +90,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     localStorage.removeItem("retailflow_token");
     localStorage.removeItem("retailflow_shop");
     localStorage.removeItem("retailflow_role");
-    toast.success("Logged out from RetailFlow 👋");
+    toast.success("Logged out from RetailFlow");
     navigate("/login");
   };
 
@@ -101,12 +99,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 bg-[#0b1120]/80 backdrop-blur-sm z-40 md:hidden"
+          className="fixed inset-0 bg-[#09090b]/80 backdrop-blur-sm z-40 md:hidden"
         />
       )}
 
       <div
-        className={`fixed md:static top-0 left-0 h-screen w-64 bg-[#0f172a] border-r border-slate-800/50 p-4 sm:p-5 transform transition-all duration-300 z-50 flex flex-col shadow-2xl md:shadow-none ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
+        className={`fixed md:static top-0 left-0 h-screen w-64 bg-[#111113] border-r border-slate-800/50 p-4 sm:p-5 transform transition-all duration-300 z-50 flex flex-col shadow-2xl md:shadow-none ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
       >
         <div className="flex justify-between items-center mb-8 md:hidden">
           <h2 className="text-lg font-bold text-white">RetailFlow Menu</h2>
@@ -131,7 +129,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           </h1>
         </Link>
 
-        <nav className="space-y-1.5 flex-1 overflow-y-auto">
+        <nav className="space-y-1.5 flex-1 overflow-y-auto min-h-0">
           {navItems.map((item) => {
             const isActive =
               item.path === "/dashboard"
@@ -154,13 +152,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           })}
         </nav>
 
-        <div className="pt-4 border-t border-slate-800/50 mt-auto">
+        <div className="pt-4 border-t border-slate-800/50 mt-auto shrink-0">
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-black text-rose-400 hover:bg-rose-500/10"
           >
             <LogOut size={18} />
-            {t("logout")}
+            {"Logout"}
           </button>
         </div>
       </div>

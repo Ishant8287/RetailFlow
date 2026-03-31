@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   XCircle,
 } from "lucide-react";
-import { useTranslation } from "react-i18next";
 import {
   getStaff,
   addStaff,
@@ -20,7 +19,6 @@ import {
 const ROLES = ["cashier", "manager"];
 
 const Staff = () => {
-  const { t } = useTranslation();
   const [staffList, setStaffList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -103,7 +101,7 @@ const Staff = () => {
         setStaffList((prev) =>
           prev.map((s) => (s._id === editingStaff._id ? res.data : s)),
         );
-        toast.success("Staff updated!");
+        toast.success("Staff updated successfully!");
       } else {
         const res = await addStaff(form);
         setStaffList((prev) => [res.data, ...prev]);
@@ -111,7 +109,9 @@ const Staff = () => {
       }
       setIsDrawerOpen(false);
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to save staff.");
+      toast.error(
+        err.response?.data?.message || "Failed to save staff details.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -136,18 +136,18 @@ const Staff = () => {
     try {
       await removeStaff(id);
       setStaffList((prev) => prev.filter((s) => s._id !== id));
-      toast.success("Staff removed.");
+      toast.success("Staff removed successfully.");
     } catch {
       toast.error("Failed to remove staff.");
     }
   };
 
   const PERMISSIONS = [
-    { key: "canAccessPOS", label: t("pos") },
-    { key: "canAccessInventory", label: t("inventory") },
-    { key: "canAccessReports", label: t("reports") },
-    { key: "canAccessKhata", label: t("khata") },
-    { key: "canAccessExpenses", label: t("expenses") },
+    { key: "canAccessPOS", label: "POS" },
+    { key: "canAccessInventory", label: "Inventory" },
+    { key: "canAccessReports", label: "Reports" },
+    { key: "canAccessKhata", label: "Khata" },
+    { key: "canAccessExpenses", label: "Expenses" },
   ];
 
   return (
@@ -155,7 +155,7 @@ const Staff = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-black tracking-tight">
-            {t("staffManagement")}
+            Staff Management
           </h1>
           <p className="text-sm text-slate-400 mt-0.5">
             Add cashiers and managers with custom permissions.
@@ -165,23 +165,23 @@ const Staff = () => {
           onClick={openAddDrawer}
           className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-md active:scale-95 transition-all"
         >
-          <Plus size={18} /> {t("addStaff")}
+          <Plus size={18} /> Add Staff
         </button>
       </div>
 
       {loading ? (
-        <div className="text-center text-slate-500 py-10">{t("loading")}</div>
+        <div className="text-center text-slate-500 py-10">Loading...</div>
       ) : staffList.length === 0 ? (
         <div className="text-center py-16 text-slate-500">
           <UserCog size={48} className="mx-auto mb-4 opacity-20" />
-          <p className="font-bold">{t("noStaff")}</p>
+          <p className="font-bold">No Staff Members Found</p>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {staffList.map((staff) => (
             <div
               key={staff._id}
-              className="bg-[#111827] border border-slate-800 rounded-2xl p-5"
+              className="bg-[#111113] border border-slate-800 rounded-2xl p-5"
             >
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
@@ -215,11 +215,11 @@ const Staff = () => {
                 <div className="flex items-center gap-1.5">
                   {staff.isActive ? (
                     <span className="text-emerald-400 text-xs font-bold flex items-center gap-1">
-                      <CheckCircle2 size={12} /> {t("active")}
+                      <CheckCircle2 size={12} /> Active
                     </span>
                   ) : (
                     <span className="text-rose-400 text-xs font-bold flex items-center gap-1">
-                      <XCircle size={12} /> {t("inactive")}
+                      <XCircle size={12} /> Inactive
                     </span>
                   )}
                 </div>
@@ -228,7 +228,7 @@ const Staff = () => {
                     onClick={() => handleToggleActive(staff)}
                     className={`p-2 text-xs font-bold rounded-lg ${staff.isActive ? "bg-rose-500/10 text-rose-400" : "bg-emerald-500/10 text-emerald-400"}`}
                   >
-                    {staff.isActive ? t("deactivate") : t("activate")}
+                    {staff.isActive ? "Deactivate" : "Activate"}
                   </button>
                   <button
                     onClick={() => openEditDrawer(staff)}
@@ -255,10 +255,10 @@ const Staff = () => {
             onClick={() => setIsDrawerOpen(false)}
             className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40"
           />
-          <div className="fixed top-0 right-0 h-dvh w-full sm:w-96 bg-[#0f172a] border-l border-slate-800 p-6 pb-24 z-50 overflow-y-auto shadow-2xl">
+          <div className="fixed top-0 right-0 h-dvh w-full sm:w-96 bg-[#111113] border-l border-slate-800 p-6 pb-24 z-50 overflow-y-auto shadow-2xl">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-black">
-                {editingStaff ? t("editStaff") : t("addStaff")}
+                {editingStaff ? "Edit Staff" : "Add Staff"}
               </h2>
               <button onClick={() => setIsDrawerOpen(false)}>
                 <X size={20} className="text-slate-400" />
@@ -267,19 +267,19 @@ const Staff = () => {
             <div className="space-y-4">
               <div>
                 <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">
-                  {t("name")}
+                  Name
                 </label>
                 <input
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="Staff member name"
-                  className="w-full p-3 bg-[#111827] border border-slate-800 rounded-xl text-white outline-none focus:border-indigo-500"
+                  className="w-full p-3 bg-[#111113] border border-slate-800 rounded-xl text-white outline-none focus:border-indigo-500"
                 />
               </div>
               {!editingStaff && (
                 <div>
                   <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">
-                    {t("phone")}
+                    Phone
                   </label>
                   <input
                     value={form.phone}
@@ -287,18 +287,18 @@ const Staff = () => {
                       setForm({ ...form, phone: e.target.value })
                     }
                     placeholder="10-digit number"
-                    className="w-full p-3 bg-[#111827] border border-slate-800 rounded-xl text-white outline-none focus:border-indigo-500"
+                    className="w-full p-3 bg-[#111113] border border-slate-800 rounded-xl text-white outline-none focus:border-indigo-500"
                   />
                 </div>
               )}
               <div>
                 <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">
-                  {t("role")}
+                  Role
                 </label>
                 <select
                   value={form.role}
                   onChange={(e) => setForm({ ...form, role: e.target.value })}
-                  className="w-full p-3 bg-[#111827] border border-slate-800 rounded-xl text-white outline-none"
+                  className="w-full p-3 bg-[#111113] border border-slate-800 rounded-xl text-white outline-none"
                 >
                   {ROLES.map((r) => (
                     <option key={r} value={r} className="capitalize">
@@ -311,7 +311,7 @@ const Staff = () => {
                 <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">
                   {editingStaff
                     ? "New PIN (leave blank to keep)"
-                    : `${t("pin")} (min 4 digits)`}
+                    : "PIN (min 4 digits)"}
                 </label>
                 <input
                   type="password"
@@ -321,12 +321,12 @@ const Staff = () => {
                   }
                   placeholder="••••"
                   maxLength={6}
-                  className="w-full p-3 bg-[#111827] border border-slate-800 rounded-xl text-white outline-none focus:border-indigo-500 tracking-widest text-center text-xl"
+                  className="w-full p-3 bg-[#111113] border border-slate-800 rounded-xl text-white outline-none focus:border-indigo-500 tracking-widest text-center text-xl"
                 />
               </div>
               <div>
                 <label className="text-xs font-bold text-slate-400 uppercase mb-3 block">
-                  {t("permissions")}
+                  Permissions
                 </label>
                 <div className="space-y-2">
                   {PERMISSIONS.map(({ key, label }) => (
@@ -360,7 +360,7 @@ const Staff = () => {
                   onClick={() => setIsDrawerOpen(false)}
                   className="flex-1 py-3 bg-slate-800 text-slate-300 font-bold rounded-xl"
                 >
-                  {t("cancel")}
+                  Cancel
                 </button>
                 <button
                   onClick={handleSave}
@@ -368,10 +368,10 @@ const Staff = () => {
                   className="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl disabled:opacity-50"
                 >
                   {isSubmitting
-                    ? t("saving")
+                    ? "Saving..."
                     : editingStaff
                       ? "Update"
-                      : t("addStaff")}
+                      : "Add Staff"}
                 </button>
               </div>
             </div>
