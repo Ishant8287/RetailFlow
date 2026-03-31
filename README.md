@@ -1,4 +1,4 @@
-# RetailFlow 🚀
+# RetailFlow
 
 **Smart Retail & Inventory Management System for Indian Businesses**
 
