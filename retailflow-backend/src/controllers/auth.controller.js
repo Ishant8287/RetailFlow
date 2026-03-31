@@ -94,9 +94,6 @@ export const sendOtp = async (req, res) => {
       });
 
     const rawOtp = generateOtp();
-    console.log(`\n=========================================`);
-    console.log(`🔑 OTP for ${contactValue}: ${rawOtp}`);
-    console.log(`=========================================\n`);
 
     shop.otp = hashOtp(rawOtp);
     shop.otpExpires = Date.now() + 10 * 60 * 1000;
@@ -270,9 +267,6 @@ export const forgotPassword = async (req, res) => {
         .json({ success: false, message: "No account found with this email." });
 
     const rawOtp = generateOtp();
-    console.log(`\n=========================================`);
-    console.log(`🔑 FORGOT PASSWORD OTP for ${email}: ${rawOtp}`);
-    console.log(`=========================================\n`);
 
     shop.otp = hashOtp(rawOtp);
     shop.otpExpires = Date.now() + 10 * 60 * 1000;

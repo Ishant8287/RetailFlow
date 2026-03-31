@@ -15,7 +15,6 @@ export const getDashboardStats = async (req, res, next) => {
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
 
-    // Run all heavy queries IN PARALLEL — not one after another
     const [salesAgg, udhaarAgg, inventoryAgg, expensesAgg, recentSales] =
       await Promise.all([
         // 1. Single aggregation for today + month sales stats
@@ -48,13 +47,11 @@ export const getDashboardStats = async (req, res, next) => {
           },
         ]),
 
-        // 2. Total udhaar across all customers
         Customer.aggregate([
           { $match: { shop: shopId } },
           { $group: { _id: null, total: { $sum: "$totalUdhaar" } } },
         ]),
 
-        // 3. Inventory value
         Item.aggregate([
           { $match: { shop: shopId } },
           { $unwind: "$batches" },
@@ -70,14 +67,11 @@ export const getDashboardStats = async (req, res, next) => {
           },
         ]),
 
-        // 4. Month expenses
         Expense.aggregate([
           { $match: { shop: shopId, date: { $gte: startOfMonth } } },
           { $group: { _id: null, total: { $sum: "$amount" } } },
         ]),
 
-        // 5. FIX: Only fetch 30 sales, only the fields the dashboard actually needs
-        // Do NOT fetch all 100 full documents with nested items arrays
         Sale.find({ shop: shopId })
           .sort({ createdAt: -1 })
           .limit(30)

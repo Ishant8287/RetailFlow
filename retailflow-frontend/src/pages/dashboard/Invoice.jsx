@@ -24,7 +24,7 @@ const Invoice = () => {
   const shopEmail = shopProfile.email || "support@retailflow.com";
   const shopAddress = shopProfile.address || "Business Address Not Configured";
 
-  // Priority: logo (business logo uploaded in settings) > avatar (profile pic) > default "R"
+  // Priority: logo 
   const shopLogo = shopProfile.logo || shopProfile.avatar || null;
 
   // Signature from settings

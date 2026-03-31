@@ -104,7 +104,7 @@ export const updateStaff = async (req, res) => {
         return res
           .status(400)
           .json({ success: false, message: "PIN must be at least 4 digits." });
-      staff.pin = pin; // pre-save hook will hash it
+      staff.pin = pin; 
     }
 
     await staff.save();

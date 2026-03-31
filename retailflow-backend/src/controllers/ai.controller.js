@@ -16,7 +16,7 @@ export const getGeminiInsights = async (req, res) => {
     const shopId = req.shop?.id || "default";
     const cacheKey = `${shopId}_${prompt}`;
 
-    // ✅ Cache check
+    //Cache check
     const cached = insightCache.get(cacheKey);
     if (cached && Date.now() - cached.time < 10 * 60 * 1000) {
       return res.status(200).json({
@@ -40,7 +40,7 @@ export const getGeminiInsights = async (req, res) => {
           content: prompt,
         },
       ],
-      max_tokens: 150, // 🔥 reduced for speed
+      max_tokens: 150,
       temperature: 0.7,
     });
 
@@ -52,7 +52,7 @@ export const getGeminiInsights = async (req, res) => {
       throw new Error("No response from AI");
     }
 
-    // ✅ Save in cache
+    //Save in cache
     insightCache.set(cacheKey, {
       text: responseText,
       time: Date.now(),

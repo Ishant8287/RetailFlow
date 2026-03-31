@@ -40,7 +40,6 @@ const uploadToImageKit = async (file, fileName) => {
   return data.url;
 };
 
-// Reusable image upload section component
 const ImageUploadSection = ({
   label,
   hint,
@@ -225,7 +224,6 @@ const Settings = () => {
         </p>
       </div>
 
-      {/* === BRAND ASSETS SECTION === */}
       <div className="bg-[#111113] border border-slate-800 rounded-2xl p-6 space-y-6 mb-6">
         <div>
           <h2 className="font-bold text-white text-lg mb-1">Brand Assets</h2>

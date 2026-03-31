@@ -4,7 +4,7 @@ import Features from "../components/landing/Features";
 import Footer from "../components/layout/Footer";
 import { CheckCircle2, ArrowRight, Star, Quote } from "lucide-react";
 
-// ─── Stats Section ─────────────────────────────────────────────────────────────
+//Stats Section
 const StatsSection = () => (
   <section className="border-y border-slate-800/60 bg-[#111113]">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -27,7 +27,7 @@ const StatsSection = () => (
   </section>
 );
 
-// ─── How It Works ──────────────────────────────────────────────────────────────
+//How It Works
 const HowItWorks = () => (
   <section className="py-24 bg-[#09090b]">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -41,7 +41,6 @@ const HowItWorks = () => (
       </div>
 
       <div className="grid md:grid-cols-3 gap-6 relative">
-        {/* Connecting line on desktop */}
         <div className="hidden md:block absolute top-8 left-[calc(16.67%+1rem)] right-[calc(16.67%+1rem)] h-px bg-linear-to-r from-indigo-500/30 via-indigo-500/60 to-indigo-500/30" />
 
         {[
@@ -79,7 +78,7 @@ const HowItWorks = () => (
   </section>
 );
 
-// ─── Testimonials ──────────────────────────────────────────────────────────────
+//Testimonials
 const Testimonials = () => (
   <section className="py-24 bg-[#111113] border-t border-slate-800/60">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -156,7 +155,7 @@ const Testimonials = () => (
   </section>
 );
 
-// ─── Pricing ───────────────────────────────────────────────────────────────────
+//Pricing
 const Pricing = () => {
   const navigate = useNavigate();
   return (
@@ -276,7 +275,7 @@ const Pricing = () => {
   );
 };
 
-// ─── CTA Banner ────────────────────────────────────────────────────────────────
+//CTA Banner
 const CTABanner = () => {
   const navigate = useNavigate();
   return (

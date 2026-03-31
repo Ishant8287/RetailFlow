@@ -8,7 +8,6 @@ export const startReminderCron = () => {
       const today = new Date();
       today.setHours(23, 59, 59, 999);
 
-      // FIX: populate("shop") was doing N+1 — this single query fetches everything
       const customersDue = await Customer.find({
         totalUdhaar: { $gt: 0 },
         nextReminderDate: { $lte: today },
@@ -17,7 +16,7 @@ export const startReminderCron = () => {
         .lean(); // .lean() returns plain objects — much faster than Mongoose documents
 
       console.log(
-        `\n⏰ RetailFlow Reminder Cron: ${customersDue.length} reminders due today\n`,
+        `\nRetailFlow Reminder Cron: ${customersDue.length} reminders due today\n`,
       );
 
       const bulkUpdates = [];
@@ -52,7 +51,6 @@ export const startReminderCron = () => {
         });
       }
 
-      // FIX: Single bulk write instead of one save() per customer in a loop
       if (bulkUpdates.length > 0) {
         await Customer.bulkWrite(bulkUpdates);
       }
@@ -64,5 +62,5 @@ export const startReminderCron = () => {
   runReminders();
   setInterval(runReminders, TWENTY_FOUR_HOURS);
 
-  console.log("✅ RetailFlow reminder scheduler started");
+  console.log("RetailFlow reminder scheduler started");
 };
