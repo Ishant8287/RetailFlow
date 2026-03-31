@@ -1,225 +1,198 @@
-🛍️ RetailFlow
-AI-Powered Retail Management SaaS
-
-RetailFlow is a modern SaaS platform for retail store management designed to help small shop owners digitize their business operations.
-It combines POS billing, inventory management, khata book, supplier tracking, analytics, and AI insights into one powerful system.
-
-🌍 Live Demo
-
-🔗 Frontend:
-https://retail-flow-xi.vercel.app/
-
-🔗 Backend:
-https://retailflow.onrender.com
-
-## 📸 Screenshots
-
-### Dashboard
-![Dashboard](screenshots/dashboard.png)
-
-### POS Billing
-![POS](screenshots/pos.png)
-
-### Inventory Management
-![Inventory](screenshots/inventory.png)
-
-### Analytics
-![Analytics](screenshots/analytics.png)
-
-
-🧠 Core Features
-🛒 POS Billing
-
-Product search and cart system
-
-Quantity management
-
-Payment split (Cash / UPI / Udhaar)
-
-PDF invoice generation
-
-Dynamic UPI QR generation
-
-📦 Inventory Management
-
-Add / edit / delete products
-
-Batch tracking
-
-Expiry date monitoring
-
-Low stock alerts
-
-Category filtering
-
-📒 Khata Book
-
-Customer credit tracking
-
-Payment history
-
-WhatsApp reminders
-
-PDF statement generation
-
-💰 Expense Tracker
-
-Record expenses
-
-Category filtering
-
-Payment method tracking
-
-Date range analysis
-
-👨‍💼 Staff Management
-
-Role based permissions
-
-Staff PIN login
-
-Active / inactive control
-
-📊 Reports & Analytics
-
-Revenue vs profit charts
-
-Payment method breakdown
-
-Category sales analysis
-
-🤖 AI Business Insights
-
-Shop performance analysis
-
-AI generated recommendations
-
-Groq API powered insights
-
-Smart caching
-
-
-## 🏗️ System Architecture
-![System Architecture](screenshots/systemarch.png)
-
-
-⚙️ Tech Stack
-🎨 Frontend
-
-React
-
-TailwindCSS
-
-Axios
-
-Recharts
-
-i18next
-
-🧠 Backend
-
-Node.js
-
-Express.js
-
-MongoDB Atlas
-
-JWT Authentication
-
-bcrypt
-
-🔐 Authentication System
-
-RetailFlow supports secure multi-role authentication.
-
-Features:
-
-Owner password login
-
-OTP login
-
-Forgot password
-
-Password reset
-
-Staff PIN login
-
-JWT authentication
-
-Role based access
-
-Roles supported:
-
-Owner
-
-Manager
-
-Cashier
-
-🛡️ Security
-
-Security features implemented:
-
-bcrypt password hashing
-
-bcrypt OTP hashing
-
-JWT authentication
-
-Helmet middleware
-
-API rate limiting
-
-.env excluded from Git
-
-🚀 Deployment
-
-| Service       | Platform      |
-| ------------- | ------------- |
-| Frontend      | Vercel        |
-| Backend       | Render        |
-| Database      | MongoDB Atlas |
-| Image Storage | ImageKit      |
-| AI Service    | Groq API      |
-
-📦 Installation
-
-Clone the repository
-
-git clone https://github.com/Ishant8287/RetailFlow
-
-Install dependencies
-
+# RetailFlow 🚀
+
+**Smart Retail & Inventory Management System for Indian Businesses**
+
+RetailFlow is a full-stack SaaS POS and business management platform built for modern Indian retailers. It replaces notebooks, spreadsheets, and manual calculations with a fast, clean, and intelligent system.
+
+---
+
+## ✨ Features
+
+| Feature | Description |
+|---|---|
+| ⚡ **Fast POS Billing** | Bill customers in seconds with split payments (Cash / UPI / Udhaar) and auto-generated invoices with QR codes |
+| 📖 **Digital Khata** | Track udhaar digitally, send WhatsApp payment reminders with UPI links, set per-customer credit limits |
+| 📦 **Smart Inventory** | Batch tracking, expiry date alerts, low stock warnings, dead stock detection |
+| 📊 **Profit Analytics** | Daily/monthly revenue, profit trends, top-selling items, payment split breakdown |
+| 💸 **Expense Tracker** | Log business costs by category to calculate accurate net profit |
+| 🚚 **Supplier Management** | Record purchase orders, auto-update stock, track supplier dues |
+| 👥 **Staff Management** | Add cashiers/managers with role-based access and custom module permissions |
+| 🤖 **AI Business Insights** | Groq-powered LLM analyzes your shop data and gives actionable Hindi-English advice |
+| 🧾 **Professional Invoices** | PDF invoices with shop logo, signature, UPI QR code, and GST details |
+| 🔐 **Secure Auth** | OTP login (email/phone), password login, JWT sessions, bcrypt-hashed PINs |
+
+---
+
+## 🛠️ Tech Stack
+
+**Frontend**
+- React 18 + Vite
+- Tailwind CSS v4
+- Recharts (analytics charts)
+- React Router v6
+- Sonner (toast notifications)
+- jsPDF + jspdf-autotable (PDF generation)
+- qrcode.react (UPI QR codes)
+- React Hook Form + Zod (settings validation)
+- ImageKit (logo/signature uploads)
+
+**Backend**
+- Node.js + Express.js
+- MongoDB + Mongoose
+- JWT authentication
+- bcryptjs (password/PIN hashing)
+- Groq SDK (LLaMA 3.1 AI insights)
+- Resend (transactional email / OTP)
+- ImageKit SDK (file uploads)
+- Express Rate Limiter + Helmet
+
+---
+
+## 📁 Project Structure
+
+```
+retailflow/
+├── retailflow-backend/
+│   ├── src/
+│   │   ├── config/         # MongoDB connection
+│   │   ├── controllers/    # Route handlers
+│   │   ├── middlewares/    # Auth, error handler, rate limiter
+│   │   ├── models/         # Mongoose schemas
+│   │   ├── routes/         # Express routers
+│   │   └── utils/          # Cache, Groq client, reminder cron
+│   ├── app.js
+│   └── server.js
+│
+└── retailflow-frontend/
+    └── src/
+        ├── api/            # Axios instance + API calls
+        ├── assets/         # Fonts, images
+        ├── components/     # Navbar, Sidebar, Topbar, landing sections
+        └── pages/
+            ├── auth/       # Login, Signup
+            └── dashboard/  # All dashboard modules
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js >= 18
+- MongoDB Atlas URI (or local MongoDB)
+- Groq API key
+- Resend API key
+- ImageKit account
+
+### 1. Clone the repo
+
+```bash
+git clone https://github.com/yourusername/retailflow.git
+cd retailflow
+```
+
+### 2. Backend Setup
+
+```bash
+cd retailflow-backend
 npm install
+```
 
-Run backend
+Create a `.env` file:
 
+```env
+PORT=5000
+NODE_ENV=development
+MONGO_URI=your_mongodb_uri
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRE=7d
+GROQ_API_KEY=your_groq_api_key
+RESEND_API_KEY=your_resend_api_key
+IMAGEKIT_PUBLIC_KEY=your_imagekit_public_key
+IMAGEKIT_PRIVATE_KEY=your_imagekit_private_key
+IMAGEKIT_URL_ENDPOINT=your_imagekit_url_endpoint
+```
+
+```bash
 npm run dev
+```
 
-Run frontend
+### 3. Frontend Setup
 
-npm start
+```bash
+cd retailflow-frontend
+npm install
+```
 
-🔮 Future Improvements
+Create a `.env` file:
 
-Multi shop support
+```env
+VITE_API_URL=http://localhost:5000/api/v1
+VITE_IMAGEKIT_PUBLIC_KEY=your_imagekit_public_key
+```
 
-Mobile app
+```bash
+npm run dev
+```
 
-Barcode scanner
+The app will be available at `http://localhost:5173`
 
-GST automation
+---
 
-Offline POS
+## 🔑 API Overview
 
-Cloud backup
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/v1/auth/register` | Register a new shop |
+| POST | `/api/v1/auth/login-password` | Login with email + password |
+| POST | `/api/v1/auth/send-otp` | Send OTP to email or phone |
+| POST | `/api/v1/auth/verify-otp` | Verify OTP and get token |
+| POST | `/api/v1/auth/staff-login` | Staff login with phone + PIN |
+| GET | `/api/v1/items` | Get all inventory items |
+| POST | `/api/v1/items` | Add new item |
+| POST | `/api/v1/sales` | Create a sale (atomic transaction) |
+| GET | `/api/v1/reports/dashboard` | Dashboard analytics aggregation |
+| GET | `/api/v1/customers` | Get all customers |
+| PUT | `/api/v1/customers/:id` | Update customer / record payment |
+| POST | `/api/v1/suppliers/:id/purchase` | Record purchase + update stock |
+| POST | `/api/v1/ai/generate` | AI business insight (Groq) |
 
-👨‍💻 Author
+---
 
-Ishant Singh
-Computer Science Student
-Full Stack Developer
+## 🏗️ Architecture Highlights
 
-⭐ Support
+- **Atomic Sales Transactions** — MongoDB sessions ensure stock deduction and sale creation are atomic, preventing inconsistency
+- **In-Memory Cache** — TTL-based cache layer on items, customers, staff, and sales reduces redundant DB reads
+- **Bulk DB Operations** — `Promise.all` for parallel saves, `bulkWrite` for reminder cron updates
+- **Role-Based Access Control** — `protect` middleware + `authorize(...roles)` guard all sensitive routes
+- **OTP Security** — OTPs are SHA-256 hashed before storage; never stored in plain text
 
-If you like this project, please give it a star ⭐ on GitHub.
+---
+
+## 📱 User Roles
+
+| Role | Access |
+|---|---|
+| **Owner** | Full access to all modules + settings + staff management |
+| **Manager** | POS, Inventory, Khata, Expenses, Suppliers, Reports |
+| **Cashier** | POS and Khata only |
+
+---
+
+## 🌐 Deployment
+
+**Backend** — Deploy to Railway, Render, or any Node.js host. Set all environment variables from the `.env` template above.
+
+**Frontend** — Deploy to Vercel or Netlify. Set `VITE_API_URL` to your backend's production URL.
+
+---
+
+## 📄 License
+
+MIT License — feel free to use and modify.
+
+---
+
+## 🙏 Acknowledgements
+
+Built with ❤️ for Indian retailers. Powered by Groq (LLaMA 3.1), MongoDB, and the open-source ecosystem.
