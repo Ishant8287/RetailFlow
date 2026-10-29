@@ -6,19 +6,19 @@ import {
   deleteItem,
   getInventoryStats,
 } from "../controllers/item.controller.js";
-import { protect, authorize } from "../middlewares/auth.middleware.js";
+import { protect, authorize, authorizePermission } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
 router.use(protect);
 
-router.get("/stats", getInventoryStats);
+router.get("/stats", authorizePermission("canAccessInventory"), getInventoryStats);
 
-router.route("/").get(getItems).post(authorize("owner", "manager"), addItem); // Cashier can't add items
+router.route("/").get(getItems).post(authorize("owner", "manager"), authorizePermission("canAccessInventory"), addItem); // Cashier can't add items
 
 router
   .route("/:id")
-  .put(authorize("owner", "manager"), updateItem)
+  .put(authorize("owner", "manager"), authorizePermission("canAccessInventory"), updateItem)
   .delete(authorize("owner"), deleteItem); // Only owner can delete
 
 export default router;
