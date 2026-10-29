@@ -167,10 +167,11 @@ export const scheduleReminder = async (req, res) => {
     }
 
     const { scheduledDate } = req.body;
-
-    customer.nextReminderDate = scheduledDate
-      ? new Date(scheduledDate)
-      : new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const reminderDate = scheduledDate ? new Date(scheduledDate) : new Date(Date.now() + 24 * 60 * 60 * 1000);
+    if (Number.isNaN(reminderDate.getTime())) {
+      return res.status(400).json({ success: false, message: "Invalid reminder date." });
+    }
+    customer.nextReminderDate = reminderDate;
     await customer.save();
 
     cache.invalidate(`customers:${req.shop.id}`);
