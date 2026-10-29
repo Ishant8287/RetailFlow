@@ -35,3 +35,12 @@ export const otpRequestLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
+// Limit expensive AI model calls separately from ordinary API traffic.
+export const aiRequestLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { success: false, message: "Too many AI insight requests. Please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
