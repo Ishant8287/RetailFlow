@@ -4,45 +4,29 @@ import { cache } from "../utils/cache.js";
 
 export const addCustomer = async (req, res) => {
   try {
-    const { name, phone, address, creditLimit } = req.body;
-
-    if (!name || !phone) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Name and phone are required." });
+    const { name, phone, address, creditLimit = 0 } = req.body;
+    const parsedCreditLimit = Number(creditLimit);
+    if (!String(name || "").trim() || !String(phone || "").trim()) {
+      return res.status(400).json({ success: false, message: "Name and phone are required." });
     }
-
-    const existing = await Customer.findOne({
-      phone,
-      shop: req.shop.id,
-    }).lean();
-    if (existing) {
-      return res.status(400).json({
-        success: false,
-        message: "Customer with this phone already exists.",
-      });
+    if (!Number.isFinite(parsedCreditLimit) || parsedCreditLimit < 0) {
+      return res.status(400).json({ success: false, message: "Credit limit must be a non-negative number." });
     }
-
+    const normalizedPhone = String(phone).trim();
+    const existing = await Customer.findOne({ phone: normalizedPhone, shop: req.shop.id }).lean();
+    if (existing) return res.status(409).json({ success: false, message: "Customer with this phone already exists." });
     const customer = await Customer.create({
-      shop: req.shop.id,
-      name,
-      phone,
-      address: address || "",
-      creditLimit: creditLimit || 0,
+      shop: req.shop.id, name: String(name).trim(), phone: normalizedPhone,
+      address: address || "", creditLimit: parsedCreditLimit,
     });
-
     cache.invalidate(`customers:${req.shop.id}`);
-
-    res.status(201).json({
-      success: true,
-      data: customer,
-      message: "Customer added! 👤",
-    });
+    return res.status(201).json({ success: true, data: customer, message: "Customer added!" });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    if (error?.code === 11000) return res.status(409).json({ success: false, message: "Customer with this phone already exists." });
+    console.error("Add customer error:", error.message);
+    return res.status(500).json({ success: false, message: "Unable to add customer right now." });
   }
 };
-
 export const getCustomers = async (req, res) => {
   try {
     const key = `customers:${req.shop.id}`;
@@ -74,63 +58,50 @@ export const getCustomers = async (req, res) => {
 
 export const updateCustomer = async (req, res) => {
   try {
-    const customer = await Customer.findOne({
-      _id: req.params.id,
-      shop: req.shop.id,
-    });
+    const customer = await Customer.findOne({ _id: req.params.id, shop: req.shop.id });
+    if (!customer) return res.status(404).json({ success: false, message: "Customer not found." });
 
-    if (!customer) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Customer not found." });
+    const { totalUdhaar, name, phone, address, creditLimit, paymentAmount, paymentNote } = req.body;
+    // Outstanding balance is an accounting ledger: only sale/receipt flows may change it.
+    if (totalUdhaar !== undefined) {
+      return res.status(400).json({ success: false, message: "Outstanding balance cannot be edited directly. Record a sale or payment instead." });
     }
-
-    const {
-      totalUdhaar,
-      name,
-      phone,
-      address,
-      creditLimit,
-      paymentAmount,
-      paymentNote,
-    } = req.body;
-
-    if (paymentAmount && paymentAmount > 0) {
-      if (paymentAmount > customer.totalUdhaar) {
-        return res.status(400).json({
-          success: false,
-          message: "Payment exceeds outstanding due amount.",
-        });
+    if (paymentAmount !== undefined) {
+      const amount = Number(paymentAmount);
+      if (!Number.isFinite(amount) || amount <= 0) {
+        return res.status(400).json({ success: false, message: "Payment amount must be a positive number." });
       }
-      customer.totalUdhaar -= paymentAmount;
-      customer.khataHistory.push({
-        transactionType: "PAYMENT_RECEIVED",
-        amount: paymentAmount,
-        description: paymentNote || "Manual payment received",
-      });
+      if (amount > customer.totalUdhaar) {
+        return res.status(400).json({ success: false, message: "Payment exceeds outstanding due amount." });
+      }
+      customer.totalUdhaar -= amount;
+      customer.khataHistory.push({ transactionType: "PAYMENT_RECEIVED", amount, description: String(paymentNote || "Manual payment received").trim() });
     }
-
-    if (totalUdhaar !== undefined && paymentAmount === undefined) {
-      customer.totalUdhaar = totalUdhaar;
+    if (name !== undefined) {
+      if (!String(name).trim()) return res.status(400).json({ success: false, message: "Customer name cannot be empty." });
+      customer.name = String(name).trim();
     }
-
-    if (name) customer.name = name;
-    if (phone) customer.phone = phone;
+    if (phone !== undefined) {
+      if (!String(phone).trim()) return res.status(400).json({ success: false, message: "Customer phone cannot be empty." });
+      customer.phone = String(phone).trim();
+    }
     if (address !== undefined) customer.address = address;
-    if (creditLimit !== undefined) customer.creditLimit = creditLimit;
+    if (creditLimit !== undefined) {
+      const parsedLimit = Number(creditLimit);
+      if (!Number.isFinite(parsedLimit) || parsedLimit < 0) return res.status(400).json({ success: false, message: "Credit limit must be a non-negative number." });
+      if (parsedLimit > 0 && parsedLimit < customer.totalUdhaar) return res.status(400).json({ success: false, message: "Credit limit cannot be lower than the current outstanding balance." });
+      customer.creditLimit = parsedLimit;
+    }
 
     await customer.save();
-
     cache.invalidate(`customers:${req.shop.id}`);
-
-    res
-      .status(200)
-      .json({ success: true, data: customer, message: "Customer updated!" });
+    return res.status(200).json({ success: true, data: customer, message: "Customer updated!" });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("Update customer error:", error.message);
+    const duplicate = error?.code === 11000;
+    return res.status(duplicate ? 409 : 500).json({ success: false, message: duplicate ? "Customer with this phone already exists." : "Unable to update customer right now." });
   }
 };
-
 export const getCustomerHistory = async (req, res) => {
   try {
     const [customer, sales] = await Promise.all([
