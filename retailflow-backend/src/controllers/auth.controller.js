@@ -19,12 +19,13 @@ const sanitizeShop = (shop) => {
 
 const sendEmail = async (to, subject, html) => {
   const resend = new Resend(process.env.RESEND_API_KEY);
-  await resend.emails.send({
+  const { error } = await resend.emails.send({
     from: "RetailFlow <onboarding@resend.dev>",
     to,
     subject,
     html,
   });
+  if (error) throw new Error(error.message || "Email provider rejected the request.");
 };
 
 const otpHtml = (rawOtp, title, subtitle) => `
@@ -153,18 +154,11 @@ export const loginWithPassword = async (req, res) => {
       return res.status(400).json({ success: false, message: "Valid email and password are required." });
     }
     const shop = await Shop.findOne({ email: normalizedEmail }).select("+password");
-    if (!shop)
-      return res
-        .status(404)
-        .json({ success: false, message: "No account found with this email." });
+    if (!shop) return res.status(401).json({ success: false, message: "Invalid email or password." });
 
     const isMatch = await bcrypt.compare(password, shop.password);
-    console.log(`[PassLogin] ${shop.shopName} — bcrypt: ${isMatch}`);
 
-    if (!isMatch)
-      return res
-        .status(401)
-        .json({ success: false, message: "Incorrect password." });
+    if (!isMatch) return res.status(401).json({ success: false, message: "Invalid email or password." });
 
     const token = shop.getSignedJwtToken();
     return res.status(200).json({
@@ -174,8 +168,8 @@ export const loginWithPassword = async (req, res) => {
       data: sanitizeShop(shop),
     });
   } catch (error) {
-    console.error("Password Login Error:", error);
-    return res.status(500).json({ success: false, message: error.message });
+    console.error("Password Login Error:", error.message);
+    return res.status(500).json({ success: false, message: "Unable to login right now." });
   }
 };
 
@@ -217,7 +211,8 @@ export const staffLogin = async (req, res) => {
       },
     });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    console.error("Staff Login Error:", error.message);
+    return res.status(500).json({ success: false, message: "Unable to sign in staff right now." });
   }
 };
 
