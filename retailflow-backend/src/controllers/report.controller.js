@@ -14,6 +14,8 @@ export const getDashboardStats = async (req, res, next) => {
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
+    const startOfNextMonth = new Date(startOfMonth);
+    startOfNextMonth.setMonth(startOfNextMonth.getMonth() + 1);
 
     const [salesAgg, udhaarAgg, inventoryAgg, expensesAgg, recentSales] =
       await Promise.all([
@@ -68,7 +70,12 @@ export const getDashboardStats = async (req, res, next) => {
         ]),
 
         Expense.aggregate([
-          { $match: { shop: shopId, date: { $gte: startOfMonth } } },
+          {
+            $match: {
+              shop: shopId,
+              date: { $gte: startOfMonth, $lt: startOfNextMonth },
+            },
+          },
           { $group: { _id: null, total: { $sum: "$amount" } } },
         ]),
 
