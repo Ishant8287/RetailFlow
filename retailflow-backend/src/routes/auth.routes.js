@@ -12,7 +12,8 @@ import {
   resetPassword,
   changePassword,
 } from "../controllers/auth.controller.js";
-import { protect } from "../middlewares/auth.middleware.js";
+import { protect, authorize } from "../middlewares/auth.middleware.js";
+import { authAttemptLimiter, otpRequestLimiter } from "../middlewares/rateLimiter.js";
 
 const router = express.Router();
 
@@ -31,16 +32,16 @@ router.get("/imagekit-auth", (req, res) => {
   }
 });
 
-router.post("/register", register);
-router.post("/send-otp", sendOtp);
-router.post("/verify-otp", verifyOtp);
-router.post("/staff-login", staffLogin);
-router.post("/login-password", loginWithPassword);
-router.post("/forgot-password", forgotPassword);
-router.post("/reset-password", resetPassword);
+router.post("/register", authAttemptLimiter, register);
+router.post("/send-otp", otpRequestLimiter, sendOtp);
+router.post("/verify-otp", authAttemptLimiter, verifyOtp);
+router.post("/staff-login", authAttemptLimiter, staffLogin);
+router.post("/login-password", authAttemptLimiter, loginWithPassword);
+router.post("/forgot-password", otpRequestLimiter, forgotPassword);
+router.post("/reset-password", authAttemptLimiter, resetPassword);
 
 router.get("/me", protect, getMe);
-router.put("/profile", protect, updateProfile);
-router.put("/change-password", protect, changePassword);
+router.put("/profile", protect, authorize("owner"), updateProfile);
+router.put("/change-password", protect, authorize("owner"), changePassword);
 
 export default router;
