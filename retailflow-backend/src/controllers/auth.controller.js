@@ -11,6 +11,8 @@ const sanitizeShop = (shop) => {
   delete obj.password;
   delete obj.otp;
   delete obj.otpExpires;
+  delete obj.otpPurpose;
+  delete obj.otpAttempts;
   delete obj.__v;
   return obj;
 };
