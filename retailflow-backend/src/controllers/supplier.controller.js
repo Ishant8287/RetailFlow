@@ -149,7 +149,8 @@ export const recordPurchase = async (req, res) => {
       item.supplier = supplier._id;
     }
 
-    await Promise.all(dbItems.map((item) => item.save({ session })));
+    // Execute transaction writes sequentially for predictable MongoDB transaction semantics.
+    for (const item of dbItems) await item.save({ session });
     supplier.purchaseHistory.push({
       items: lines.map(({ name, quantity, unitCost }) => ({ name, quantity, unitCost })),
       totalAmount,
