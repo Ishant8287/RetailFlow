@@ -15,7 +15,10 @@ const staffSchema = new mongoose.Schema(
     pin: {
       type: String,
       required: true,
-      minlength: 4,
+      validate: {
+        validator: (value) => /^\\d{4,8}$/.test(String(value || "")),
+        message: "Staff PIN must be 4 to 8 digits.",
+      },
       select: false, // Never returned in queries by default
     },
     isActive: { type: Boolean, default: true },
