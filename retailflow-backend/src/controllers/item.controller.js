@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Item from "../models/Item.js";
 import { cache } from "../utils/cache.js";
 
@@ -25,7 +26,11 @@ export const addItem = async (req, res) => {
       .status(201)
       .json({ success: true, data: item, message: "Item added! 📦" });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    if (error.name === "ValidationError" || error.name === "CastError") {
+      return res.status(400).json({ success: false, message: "Invalid item fields. Check prices, quantities, and required values." });
+    }
+    console.error("Add item error:", error.message);
+    return res.status(500).json({ success: false, message: "Unable to add item right now." });
   }
 };
 
@@ -87,7 +92,11 @@ export const updateItem = async (req, res) => {
       .status(200)
       .json({ success: true, data: item, message: "Item updated!" });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    if (error.name === "ValidationError" || error.name === "CastError") {
+      return res.status(400).json({ success: false, message: "Invalid item fields. Check prices, quantities, and required values." });
+    }
+    console.error("Update item error:", error.message);
+    return res.status(500).json({ success: false, message: "Unable to update item right now." });
   }
 };
 
@@ -116,28 +125,39 @@ export const deleteItem = async (req, res) => {
 // @desc    Get inventory stats
 // @route   GET /api/v1/items/stats
 export const getInventoryStats = async (req, res) => {
-  const stats = await Item.aggregate([
-    { $match: { shop: new mongoose.Types.ObjectId(req.shop.id) } },
-    {
-      $project: {
-        totalQty: { $sum: "$batches.quantity" },
-        alertQuantity: 1,
-        isOutOfStock: {
-          $cond: [{ $eq: [{ $sum: "$batches.quantity" }, 0] }, 1, 0],
+  try {
+    const stats = await Item.aggregate([
+      { $match: { shop: new mongoose.Types.ObjectId(req.shop.id) } },
+      {
+        $project: {
+          totalQty: { $sum: "$batches.quantity" },
+          alertQuantity: 1,
+          isOutOfStock: {
+            $cond: [{ $eq: [{ $sum: "$batches.quantity" }, 0] }, 1, 0],
+          },
         },
       },
-    },
-    {
-      $group: {
-        _id: null,
-        totalItems: { $sum: 1 },
-        lowStockCount: {
-          $sum: { $cond: [{ $lte: ["$totalQty", "$alertQuantity"] }, 1, 0] },
+      {
+        $group: {
+          _id: null,
+          totalItems: { $sum: 1 },
+          lowStockCount: {
+            $sum: { $cond: [{ $lte: ["$totalQty", "$alertQuantity"] }, 1, 0] },
+          },
+          outOfStockCount: { $sum: "$isOutOfStock" },
         },
-        outOfStockCount: { $sum: "$isOutOfStock" },
       },
-    },
-  ]);
+    ]);
 
-  res.status(200).json({ success: true, stats: stats[0] });
+    return res.status(200).json({
+      success: true,
+      stats: stats[0] || { totalItems: 0, lowStockCount: 0, outOfStockCount: 0 },
+    });
+  } catch (error) {
+    console.error("Inventory stats error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to load inventory statistics.",
+    });
+  }
 };

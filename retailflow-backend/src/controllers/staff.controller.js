@@ -13,10 +13,8 @@ export const addStaff = async (req, res) => {
       });
     }
 
-    if (pin.length < 4) {
-      return res
-        .status(400)
-        .json({ success: false, message: "PIN must be at least 4 digits." });
+    if (!/^\d{4,8}$/.test(String(pin))) {
+      return res.status(400).json({ success: false, message: "PIN must contain 4 to 8 digits." });
     }
 
     const existing = await Staff.findOne({ phone }).lean();
@@ -100,10 +98,9 @@ export const updateStaff = async (req, res) => {
       staff.permissions = { ...staff.permissions, ...permissions };
 
     if (pin) {
-      if (pin.length < 4)
-        return res
-          .status(400)
-          .json({ success: false, message: "PIN must be at least 4 digits." });
+      if (!/^\d{4,8}$/.test(String(pin))) {
+        return res.status(400).json({ success: false, message: "PIN must contain 4 to 8 digits." });
+      }
       staff.pin = pin; 
     }
 

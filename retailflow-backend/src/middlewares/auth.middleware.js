@@ -96,3 +96,34 @@ export const authorize = (...roles) => {
     next();
   };
 };
+
+
+// Enforce per-staff permissions on the API, not only in frontend navigation.
+export const authorizePermission = (permission) => (req, res, next) => {
+  if (req.role === "owner") return next();
+
+  if (req.staff?.permissions?.[permission] !== true) {
+    return res.status(403).json({
+      success: false,
+      message: "Access denied. Your staff account does not have this permission.",
+    });
+  }
+
+  return next();
+};
+
+
+// Permit a staff member when at least one relevant feature permission is granted.
+export const authorizeAnyPermission = (...permissions) => (req, res, next) => {
+  if (req.role === "owner") return next();
+
+  const granted = permissions.some((permission) => req.staff?.permissions?.[permission] === true);
+  if (!granted) {
+    return res.status(403).json({
+      success: false,
+      message: "Access denied. Your staff account does not have the required permission.",
+    });
+  }
+
+  return next();
+};

@@ -30,8 +30,10 @@ const shopSchema = new mongoose.Schema(
     avatar: { type: String, default: null },
 
     //OTP Fields for Login
-    otp: { type: String, default: null },
-    otpExpires: { type: Date, default: null },
+    otp: { type: String, default: null, select: false },
+    otpExpires: { type: Date, default: null, select: false },
+    otpPurpose: { type: String, enum: ["login", "reset"], default: null, select: false },
+    otpAttempts: { type: Number, default: 0, select: false },
 
     // --- Business Settings Fields ---
     address: { type: String, default: "" },

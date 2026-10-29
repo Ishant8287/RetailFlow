@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Supplier from "../models/Supplier.js";
 import Item from "../models/Item.js";
 import { cache } from "../utils/cache.js";
@@ -94,84 +95,88 @@ export const updateSupplier = async (req, res) => {
 // @route   POST /api/v1/suppliers/:id/purchase
 // Records a purchase order from this supplier + updates item stock
 export const recordPurchase = async (req, res) => {
+  let session;
   try {
-    const supplier = await Supplier.findOne({
-      _id: req.params.id,
-      shop: req.shop.id,
-    });
-    if (!supplier)
-      return res
-        .status(404)
-        .json({ success: false, message: "Supplier not found." });
-
-    const { items, totalAmount, amountPaid, invoiceNumber, notes } = req.body;
-
-    if (!items || items.length === 0) {
-      return res
-        .status(400)
-        .json({ success: false, message: "At least one item is required." });
+    const { items, amountPaid = 0, invoiceNumber, notes } = req.body;
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ success: false, message: "At least one purchase line is required." });
+    }
+    const parsedAmountPaid = Number(amountPaid);
+    if (!Number.isFinite(parsedAmountPaid) || parsedAmountPaid < 0) {
+      return res.status(400).json({ success: false, message: "Amount paid must be a non-negative number." });
+    }
+    const lines = [];
+    for (const line of items) {
+      const quantity = Number(line?.quantity);
+      const unitCost = Number(line?.unitCost);
+      if (!line || !String(line.name || "").trim() || !Number.isFinite(quantity) || quantity <= 0 || !Number.isFinite(unitCost) || unitCost < 0) {
+        return res.status(400).json({ success: false, message: "Each purchase line needs a name, positive quantity, and non-negative unit cost." });
+      }
+      if (line.itemId && !mongoose.isValidObjectId(line.itemId)) {
+        return res.status(400).json({ success: false, message: "Invalid inventory item in purchase." });
+      }
+      lines.push({ itemId: line.itemId || null, name: String(line.name).trim(), quantity, unitCost });
+    }
+    const totalAmount = lines.reduce((sum, line) => sum + line.quantity * line.unitCost, 0);
+    if (!Number.isFinite(totalAmount) || totalAmount < 0 || parsedAmountPaid > totalAmount) {
+      return res.status(400).json({ success: false, message: "Amount paid cannot exceed the computed purchase total." });
+    }
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, message: "Invalid supplier." });
     }
 
-    // OPTIMIZED: Fetch all items in ONE query instead of one per loop iteration
-    const itemIds = items.filter((i) => i.itemId).map((i) => i.itemId);
+    session = await mongoose.startSession();
+    session.startTransaction();
+    const supplier = await Supplier.findOne({ _id: req.params.id, shop: req.shop.id }).session(session);
+    if (!supplier) {
+      const error = new Error("Supplier not found."); error.statusCode = 404; throw error;
+    }
 
-    const dbItems = await Item.find({
-      _id: { $in: itemIds },
-      shop: req.shop.id,
-    });
-
-    const itemMap = {};
-    dbItems.forEach((item) => {
-      itemMap[item._id.toString()] = item;
-    });
-
-    // Update batches in memory
-    for (const purchasedItem of items) {
-      if (!purchasedItem.itemId) continue;
-      const item = itemMap[purchasedItem.itemId.toString()];
-      if (!item) continue;
-
+    const itemIds = [...new Set(lines.filter((line) => line.itemId).map((line) => String(line.itemId)))];
+    const dbItems = itemIds.length ? await Item.find({ _id: { $in: itemIds }, shop: req.shop.id }).session(session) : [];
+    const itemMap = Object.create(null);
+    dbItems.forEach((item) => { itemMap[String(item._id)] = item; });
+    for (const line of lines) {
+      if (!line.itemId) continue; // Manual/non-inventory purchase line
+      const item = itemMap[String(line.itemId)];
+      if (!item) { const error = new Error("An inventory item was not found in this shop."); error.statusCode = 400; throw error; }
       item.batches.push({
-        purchasePrice: purchasedItem.unitCost,
-        sellingPrice: item.batches?.[0]?.sellingPrice || 0,
-        quantity: purchasedItem.quantity,
+        purchasePrice: line.unitCost,
+        sellingPrice: Number(item.batches?.[0]?.sellingPrice || 0),
+        quantity: line.quantity,
         addedDate: new Date(),
       });
       item.supplier = supplier._id;
     }
 
-    // Save all items in parallel
-    await Promise.all(dbItems.map((item) => item.save()));
-
-    // Log purchase on supplier
+    // Execute transaction writes sequentially for predictable MongoDB transaction semantics.
+    for (const item of dbItems) await item.save({ session });
     supplier.purchaseHistory.push({
-      items,
+      items: lines.map(({ name, quantity, unitCost }) => ({ name, quantity, unitCost })),
       totalAmount,
-      amountPaid: amountPaid || 0,
-      invoiceNumber: invoiceNumber || "",
-      notes: notes || "",
+      amountPaid: parsedAmountPaid,
+      invoiceNumber: String(invoiceNumber || "").trim(),
+      notes: String(notes || "").trim(),
     });
-
     supplier.totalPurchased += totalAmount;
-    supplier.totalDue += totalAmount - (amountPaid || 0);
+    supplier.totalDue += totalAmount - parsedAmountPaid;
+    await supplier.save({ session });
+    await session.commitTransaction();
 
-    await supplier.save();
-
-    // Invalidate caches
     cache.invalidate(`suppliers:${req.shop.id}`);
     cache.invalidate(`items:${req.shop.id}`);
-
-    res.status(201).json({
-      success: true,
-      data: supplier,
-      message: "Purchase recorded and stock updated!",
-    });
+    return res.status(201).json({ success: true, data: supplier, message: "Purchase recorded and stock updated!", totalAmount });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    if (session?.inTransaction()) {
+      try { await session.abortTransaction(); } catch (abortError) { console.error("Purchase rollback failed:", abortError.message); }
+    }
+    console.error("Record purchase error:", error.message);
+    const status = error.statusCode || (error.name === "ValidationError" || error.name === "CastError" ? 400 : 500);
+    return res.status(status).json({ success: false, message: status >= 500 ? "Unable to record purchase right now." : error.message });
+  } finally {
+    if (session) await session.endSession();
   }
 };
-
-// @route   DELETE /api/v1/suppliers/:id
 export const deleteSupplier = async (req, res) => {
   try {
     const supplier = await Supplier.findOne({
