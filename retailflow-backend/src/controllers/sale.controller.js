@@ -148,7 +148,7 @@ export const createSale = async (req, res) => {
       throw requestError("Payment split must equal the sale total.");
     }
 
-    await Promise.all(dbItems.map((item) => item.save({ session })));
+    // Keep transaction writes sequential; parallel operations in a MongoDB transaction are unsupported.\n    for (const item of dbItems) await item.save({ session });
     const sale = new Sale({
       shop: req.shop.id,
       customer: dbCustomer?._id || null,
