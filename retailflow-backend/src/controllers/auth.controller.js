@@ -50,7 +50,7 @@ export const register = async (req, res) => {
     const normalizedShopName = typeof shopName === "string" ? shopName.trim() : "";
     const email = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
     const normalizedPhone = String(phone || "").trim();
-    if (!normalizedOwnerName || !normalizedShopName || !/^[^\s@]+@[^\s@]+\\.[^\s@]+$/.test(email) || typeof password !== "string" || password.length < 6 || !normalizedPhone) {
+    if (!normalizedOwnerName || !normalizedShopName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || typeof password !== "string" || password.length < 6 || !normalizedPhone) {
       return res.status(400).json({ success: false, message: "Valid name, shop name, email, phone, and a password of at least 6 characters are required." });
     }
     const shopExists = await Shop.findOne({ email }).lean();
