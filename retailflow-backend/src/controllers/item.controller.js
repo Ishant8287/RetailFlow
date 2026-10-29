@@ -26,7 +26,11 @@ export const addItem = async (req, res) => {
       .status(201)
       .json({ success: true, data: item, message: "Item added! 📦" });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    if (error.name === "ValidationError" || error.name === "CastError") {
+      return res.status(400).json({ success: false, message: "Invalid item fields. Check prices, quantities, and required values." });
+    }
+    console.error("Add item error:", error.message);
+    return res.status(500).json({ success: false, message: "Unable to add item right now." });
   }
 };
 
@@ -88,7 +92,11 @@ export const updateItem = async (req, res) => {
       .status(200)
       .json({ success: true, data: item, message: "Item updated!" });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    if (error.name === "ValidationError" || error.name === "CastError") {
+      return res.status(400).json({ success: false, message: "Invalid item fields. Check prices, quantities, and required values." });
+    }
+    console.error("Update item error:", error.message);
+    return res.status(500).json({ success: false, message: "Unable to update item right now." });
   }
 };
 
