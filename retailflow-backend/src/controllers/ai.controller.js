@@ -40,8 +40,10 @@ export const getGeminiInsights = async (req, res) => {
           content: prompt,
         },
       ],
-      max_tokens: 150,
-      temperature: 0.7,
+    max_completion_tokens: 1024,
+    reasoning_effort: "low",
+    include_reasoning: false,
+    temperature: 0.7,
     });
 
     console.timeEnd("AI Response");
