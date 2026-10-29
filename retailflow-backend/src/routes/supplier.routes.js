@@ -6,18 +6,18 @@ import {
   recordPurchase,
   deleteSupplier,
 } from "../controllers/supplier.controller.js";
-import { protect, authorize } from "../middlewares/auth.middleware.js";
+import { protect, authorize, authorizePermission } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 router.use(protect, authorize("owner", "manager"));
 router
   .route("/")
-  .get(getSuppliers)
-  .post(authorize("owner", "manager"), addSupplier);
+  .get(authorizePermission("canAccessInventory"), getSuppliers)
+  .post(authorizePermission("canAccessInventory"), addSupplier);
 router
   .route("/:id")
-  .put(authorize("owner", "manager"), updateSupplier)
+  .put(authorizePermission("canAccessInventory"), updateSupplier)
   .delete(authorize("owner"), deleteSupplier);
-router.post("/:id/purchase", authorize("owner", "manager"), recordPurchase);
+router.post("/:id/purchase", authorizePermission("canAccessInventory"), recordPurchase);
 
 export default router;
