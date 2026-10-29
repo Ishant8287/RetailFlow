@@ -395,17 +395,23 @@ export const getMe = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
   try {
-    const { password, email, otp, otpExpires, ...updateData } = req.body;
-    const shop = await Shop.findByIdAndUpdate(req.shop.id, updateData, {
-      new: true,
-      runValidators: true,
-    });
-    return res.status(200).json({
-      success: true,
-      message: "Profile updated!",
-      data: sanitizeShop(shop),
-    });
+    const allowedFields = [
+      "ownerName", "shopName", "phone", "avatar", "address", "gstEnabled",
+      "gst", "upiId", "bankName", "accountNumber", "ifsc", "signatoryName",
+      "designation", "logo", "signature",
+    ];
+    const updateData = {};
+    for (const field of allowedFields) {
+      if (Object.prototype.hasOwnProperty.call(req.body, field)) updateData[field] = req.body[field];
+    }
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ success: false, message: "No editable profile fields were provided." });
+    }
+    const shop = await Shop.findByIdAndUpdate(req.shop.id, updateData, { new: true, runValidators: true });
+    if (!shop) return res.status(404).json({ success: false, message: "Shop not found." });
+    return res.status(200).json({ success: true, message: "Profile updated!", data: sanitizeShop(shop) });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    console.error("Profile Update Error:", error.message);
+    return res.status(400).json({ success: false, message: "Unable to update profile. Check the submitted fields." });
   }
 };
