@@ -16,21 +16,21 @@ const itemSchema = new mongoose.Schema(
     category: { type: String, default: "General" },
     unit: { type: String, required: true },
 
-    taxPercent: { type: Number, default: 0 },
+    taxPercent: { type: Number, min: 0, max: 100, default: 0 },
     hsn: { type: String, default: "" },
 
     batches: [
       {
         batchNumber: String,
-        purchasePrice: { type: Number, default: 0 },
-        sellingPrice: { type: Number, default: 0 },
-        quantity: { type: Number, default: 0 },
+        purchasePrice: { type: Number, min: 0, default: 0 },
+        sellingPrice: { type: Number, min: 0, default: 0 },
+        quantity: { type: Number, min: 0, default: 0 },
         expiryDate: Date,
         addedDate: { type: Date, default: Date.now },
       },
     ],
 
-    alertQuantity: { type: Number, default: 10 },
+    alertQuantity: { type: Number, min: 0, default: 10 },
 
     adjustments: [
       {
