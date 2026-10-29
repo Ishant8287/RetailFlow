@@ -286,41 +286,27 @@ export const resetPassword = async (req, res) => {
 export const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
-    if (!currentPassword || !newPassword)
-      return res.status(400).json({
-        success: false,
-        message: "Current and new password are required.",
-      });
-
-    if (newPassword.length < 6)
-      return res.status(400).json({
-        success: false,
-        message: "New password must be at least 6 characters.",
-      });
-
-    const shop = await Shop.findById(req.shop.id).select("+password");
-    if (!shop)
-      return res
-        .status(404)
-        .json({ success: false, message: "Account not found." });
-
+    if (typeof currentPassword !== "string" || typeof newPassword !== "string" || !currentPassword || newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: "Current password is required and new password must be at least 6 characters." });
+    }
+    const shop = await Shop.findById(req.shop.id).select("+password +otp +otpExpires +otpPurpose +otpAttempts");
+    if (!shop) return res.status(404).json({ success: false, message: "Account not found." });
     const isMatch = await bcrypt.compare(currentPassword, shop.password);
-    if (!isMatch)
-      return res
-        .status(401)
-        .json({ success: false, message: "Current password is incorrect." });
+    if (!isMatch) return res.status(401).json({ success: false, message: "Current password is incorrect." });
 
     shop.password = newPassword;
+    // Changing credentials invalidates any outstanding login/reset code.
+    shop.otp = null;
+    shop.otpExpires = null;
+    shop.otpPurpose = null;
+    shop.otpAttempts = 0;
     await shop.save();
-
-    return res
-      .status(200)
-      .json({ success: true, message: "Password changed successfully!" });
+    return res.status(200).json({ success: true, message: "Password changed successfully!" });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    console.error("Change Password Error:", error.message);
+    return res.status(500).json({ success: false, message: "Unable to change password right now." });
   }
 };
-
 export const getMe = async (req, res) => {
   try {
     // Staff tokens must never receive the owner profile or bank details.
