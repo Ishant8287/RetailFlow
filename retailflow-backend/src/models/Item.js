@@ -51,6 +51,5 @@ const itemSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-itemSchema.index({ shop: 1 });
 
 export default mongoose.model("Item", itemSchema);
