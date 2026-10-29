@@ -42,36 +42,25 @@ const generateOtp = () => crypto.randomInt(100000, 1000000).toString();
 
 export const register = async (req, res) => {
   try {
-    const { ownerName, shopName, email, password, phone } = req.body;
-    if (!ownerName || !shopName || !email || !password || !phone)
-      return res
-        .status(400)
-        .json({ success: false, message: "All fields are required." });
-
+    const { ownerName, shopName, password, phone } = req.body;
+    const email = String(req.body.email || "").trim().toLowerCase();
+    if (!String(ownerName || "").trim() || !String(shopName || "").trim() || !email || typeof password !== "string" || password.length < 6 || !String(phone || "").trim()) {
+      return res.status(400).json({ success: false, message: "All fields are required and password must be at least 6 characters." });
+    }
     const shopExists = await Shop.findOne({ email }).lean();
-    if (shopExists)
-      return res.status(400).json({
-        success: false,
-        message: "An account with this email already exists.",
-      });
-
-    const shop = await Shop.create({
-      ownerName,
-      shopName,
-      email,
-      password,
-      phone,
-    });
-    res.status(201).json({
+    if (shopExists) return res.status(409).json({ success: false, message: "An account with this email already exists." });
+    const shop = await Shop.create({ ownerName: ownerName.trim(), shopName: shopName.trim(), email, password, phone: String(phone).trim() });
+    return res.status(201).json({
       success: true,
       message: "RetailFlow account created successfully! Please login.",
       data: { id: shop._id, shopName: shop.shopName, email: shop.email },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    if (error?.code === 11000) return res.status(409).json({ success: false, message: "An account with this email already exists." });
+    console.error("Registration Error:", error.message);
+    return res.status(500).json({ success: false, message: "Unable to register right now." });
   }
 };
-
 export const sendOtp = async (req, res) => {
   try {
     const { contactMethod, contactValue } = req.body;
@@ -114,7 +103,7 @@ export const verifyOtp = async (req, res) => {
   try {
     const email = String(req.body.contactValue || "").trim().toLowerCase();
     const { contactMethod, otp } = req.body;
-    if (contactMethod !== "email" || !email || !/^\\d{6}$/.test(String(otp || ""))) {
+    if (contactMethod !== "email" || !email || !/^\d{6}$/.test(String(otp || ""))) {
       return res.status(400).json({ success: false, message: "A valid email and six-digit OTP are required." });
     }
 
@@ -157,15 +146,17 @@ export const loginWithPassword = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Email and password are required." });
 
-    const shop = await Shop.findOne({
-      email: email.toLowerCase().trim(),
-    }).select("+password");
+    const normalizedEmail = String(email || "").trim().toLowerCase();
+    if (!normalizedEmail || typeof password !== "string") {
+      return res.status(400).json({ success: false, message: "Valid email and password are required." });
+    }
+    const shop = await Shop.findOne({ email: normalizedEmail }).select("+password");
     if (!shop)
       return res
         .status(404)
         .json({ success: false, message: "No account found with this email." });
 
-    const isMatch = await bcrypt.compare(password.trim(), shop.password);
+    const isMatch = await bcrypt.compare(password, shop.password);
     console.log(`[PassLogin] ${shop.shopName} — bcrypt: ${isMatch}`);
 
     if (!isMatch)
