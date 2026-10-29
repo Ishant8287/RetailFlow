@@ -261,53 +261,37 @@ export const forgotPassword = async (req, res) => {
 
 export const resetPassword = async (req, res) => {
   try {
-    const { email, otp, newPassword } = req.body;
-    if (!email || !otp || !newPassword)
-      return res.status(400).json({
-        success: false,
-        message: "Email, OTP, and new password are required.",
-      });
+    const email = String(req.body.email || "").trim().toLowerCase();
+    const { otp, newPassword } = req.body;
+    if (!email || !/^\d{6}$/.test(String(otp || "")) || typeof newPassword !== "string" || newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: "Valid email, six-digit OTP, and password of at least 6 characters are required." });
+    }
 
-    if (newPassword.length < 6)
-      return res.status(400).json({
-        success: false,
-        message: "Password must be at least 6 characters.",
-      });
-
-    const shop = await Shop.findOne({ email }).select(
-      "+password +otp +otpExpires",
-    );
-    if (!shop)
-      return res
-        .status(404)
-        .json({ success: false, message: "Account not found." });
-
-    if (!shop.otp || !shop.otpExpires)
-      return res
-        .status(400)
-        .json({ success: false, message: "No reset OTP requested." });
-
-    if (shop.otpExpires < Date.now())
-      return res.status(400).json({
-        success: false,
-        message: "OTP expired. Please request a new one.",
-      });
-
-    const isMatch = shop.otp === hashOtp(otp);
-    if (!isMatch)
-      return res.status(400).json({ success: false, message: "Invalid OTP." });
+    const shop = await Shop.findOne({ email }).select("+password +otp +otpExpires +otpPurpose +otpAttempts");
+    if (!shop) return res.status(404).json({ success: false, message: "Account not found." });
+    if (!shop.otp || !shop.otpExpires || shop.otpPurpose !== "reset") {
+      return res.status(400).json({ success: false, message: "No password-reset OTP requested. Please request a new one." });
+    }
+    if (new Date(shop.otpExpires).getTime() < Date.now()) {
+      shop.otp = null; shop.otpExpires = null; shop.otpPurpose = null; shop.otpAttempts = 0;
+      await shop.save();
+      return res.status(400).json({ success: false, message: "OTP expired. Please request a new one." });
+    }
+    if (shop.otp !== hashOtp(String(otp))) {
+      shop.otpAttempts = (shop.otpAttempts || 0) + 1;
+      const locked = shop.otpAttempts >= 5;
+      if (locked) { shop.otp = null; shop.otpExpires = null; shop.otpPurpose = null; shop.otpAttempts = 0; }
+      await shop.save();
+      return res.status(400).json({ success: false, message: locked ? "Too many incorrect OTP attempts. Request a new OTP." : "Invalid OTP." });
+    }
 
     shop.password = newPassword;
-    shop.otp = null;
-    shop.otpExpires = null;
+    shop.otp = null; shop.otpExpires = null; shop.otpPurpose = null; shop.otpAttempts = 0;
     await shop.save();
-
-    return res.status(200).json({
-      success: true,
-      message: "Password reset successfully! Please login.",
-    });
+    return res.status(200).json({ success: true, message: "Password reset successfully! Please login." });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    console.error("Password Reset Error:", error.message);
+    return res.status(500).json({ success: false, message: "Unable to reset password right now." });
   }
 };
 
