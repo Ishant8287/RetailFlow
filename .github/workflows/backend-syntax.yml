@@ -1,0 +1,34 @@
+name: Backend Syntax Check
+
+on:
+  pull_request:
+    paths:
+      - "retailflow-backend/**"
+      - ".github/workflows/backend-syntax.yml"
+  push:
+    branches:
+      - main
+      - pre-submission/backend-hardening
+    paths:
+      - "retailflow-backend/**"
+      - ".github/workflows/backend-syntax.yml"
+
+jobs:
+  syntax:
+    name: Check backend JavaScript syntax
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: retailflow-backend
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Parse all backend JavaScript files
+        shell: bash
+        run: |
+          find . -type f -name '*.js' -not -path './node_modules/*' -print0 |
+            xargs -0 -r -n1 node --check
