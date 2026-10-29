@@ -75,47 +75,38 @@ export const register = async (req, res) => {
 export const sendOtp = async (req, res) => {
   try {
     const { contactMethod, contactValue } = req.body;
-    if (!contactMethod || !contactValue)
-      return res.status(400).json({
-        success: false,
-        message: "Contact method and value are required.",
-      });
+    if (contactMethod !== "email") {
+      return res.status(400).json({ success: false, message: "Email OTP is supported currently; phone OTP is not configured." });
+    }
+    const email = String(contactValue || "").trim().toLowerCase();
+    if (!email) return res.status(400).json({ success: false, message: "A valid email address is required." });
 
-    const query =
-      contactMethod === "email"
-        ? { email: contactValue }
-        : { phone: contactValue };
-
-    const shop = await Shop.findOne(query);
-    if (!shop)
-      return res.status(404).json({
-        success: false,
-        message: "No RetailFlow account found with this detail.",
-      });
+    const shop = await Shop.findOne({ email }).select("+otp +otpExpires +otpPurpose +otpAttempts");
+    if (!shop) return res.status(404).json({ success: false, message: "No RetailFlow account found with this email." });
 
     const rawOtp = generateOtp();
-
     shop.otp = hashOtp(rawOtp);
-    shop.otpExpires = Date.now() + 10 * 60 * 1000;
+    shop.otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+    shop.otpPurpose = "login";
+    shop.otpAttempts = 0;
     await shop.save();
 
-    res.status(200).json({
-      success: true,
-      message: `OTP sent! Check your ${contactMethod}.`,
-    });
-
-    if (contactMethod === "email") {
-      sendEmail(
-        shop.email,
-        "RetailFlow - Your Login OTP",
-        otpHtml(rawOtp, "RetailFlow Login", "Your one-time login OTP is:"),
-      ).catch((err) => console.error("Email failed:", err.message));
+    try {
+      await sendEmail(shop.email, "RetailFlow - Your Login OTP", otpHtml(rawOtp, "RetailFlow Login", "Your one-time login OTP is:"));
+    } catch (emailError) {
+      shop.otp = null;
+      shop.otpExpires = null;
+      shop.otpPurpose = null;
+      shop.otpAttempts = 0;
+      await shop.save();
+      console.error("Login OTP delivery failed:", emailError.message);
+      return res.status(502).json({ success: false, message: "Unable to send OTP right now. Please try again later." });
     }
+
+    return res.status(200).json({ success: true, message: "OTP sent. Check your email." });
   } catch (error) {
-    console.error("OTP Send Error:", error);
-    return res
-      .status(500)
-      .json({ success: false, message: "Failed to send OTP." });
+    console.error("OTP Send Error:", error.message);
+    return res.status(500).json({ success: false, message: "Failed to send OTP." });
   }
 };
 
