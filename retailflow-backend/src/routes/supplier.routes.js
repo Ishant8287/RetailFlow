@@ -9,7 +9,7 @@ import {
 import { protect, authorize } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
-router.use(protect);
+router.use(protect, authorize("owner", "manager"));
 router
   .route("/")
   .get(getSuppliers)
