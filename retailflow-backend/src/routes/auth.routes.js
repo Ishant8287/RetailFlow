@@ -17,7 +17,7 @@ import { authAttemptLimiter, otpRequestLimiter } from "../middlewares/rateLimite
 
 const router = express.Router();
 
-router.get("/imagekit-auth", (req, res) => {
+router.get("/imagekit-auth", protect, (req, res) => {
   try {
     const imagekit = new ImageKit({
       publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
