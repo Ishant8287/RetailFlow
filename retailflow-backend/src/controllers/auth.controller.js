@@ -112,55 +112,40 @@ export const sendOtp = async (req, res) => {
 
 export const verifyOtp = async (req, res) => {
   try {
-    const { contactMethod, contactValue, otp } = req.body;
-    if (!contactMethod || !contactValue || !otp)
-      return res
-        .status(400)
-        .json({ success: false, message: "All fields required." });
+    const email = String(req.body.contactValue || "").trim().toLowerCase();
+    const { contactMethod, otp } = req.body;
+    if (contactMethod !== "email" || !email || !/^\\d{6}$/.test(String(otp || ""))) {
+      return res.status(400).json({ success: false, message: "A valid email and six-digit OTP are required." });
+    }
 
-    const query =
-      contactMethod === "email"
-        ? { email: contactValue }
-        : { phone: contactValue };
-
-    const shop = await Shop.findOne(query).select("+otp +otpExpires");
-    if (!shop)
-      return res
-        .status(404)
-        .json({ success: false, message: "Account not found." });
-
-    if (!shop.otp || !shop.otpExpires)
+    const shop = await Shop.findOne({ email }).select("+otp +otpExpires +otpPurpose +otpAttempts");
+    if (!shop) return res.status(404).json({ success: false, message: "Account not found." });
+    if (!shop.otp || !shop.otpExpires || shop.otpPurpose !== "login") {
+      return res.status(400).json({ success: false, message: "No login OTP requested. Please request a new one." });
+    }
+    if (new Date(shop.otpExpires).getTime() < Date.now()) {
+      shop.otp = null; shop.otpExpires = null; shop.otpPurpose = null; shop.otpAttempts = 0;
+      await shop.save();
+      return res.status(400).json({ success: false, message: "OTP expired. Please request a new one." });
+    }
+    if (shop.otp !== hashOtp(String(otp))) {
+      shop.otpAttempts = (shop.otpAttempts || 0) + 1;
+      const locked = shop.otpAttempts >= 5;
+      if (locked) { shop.otp = null; shop.otpExpires = null; shop.otpPurpose = null; shop.otpAttempts = 0; }
+      await shop.save();
       return res.status(400).json({
         success: false,
-        message: "No OTP requested. Please request a new one.",
+        message: locked ? "Too many incorrect OTP attempts. Request a new OTP." : "Invalid OTP. Please check and try again.",
       });
+    }
 
-    if (shop.otpExpires < Date.now())
-      return res.status(400).json({
-        success: false,
-        message: "OTP expired. Please request a new one.",
-      });
-
-    const isMatch = shop.otp === hashOtp(otp);
-    if (!isMatch)
-      return res.status(400).json({
-        success: false,
-        message: "Invalid OTP. Please check and try again.",
-      });
-
-    shop.otp = null;
-    shop.otpExpires = null;
+    shop.otp = null; shop.otpExpires = null; shop.otpPurpose = null; shop.otpAttempts = 0;
     await shop.save();
-
     const token = shop.getSignedJwtToken();
-    return res.status(200).json({
-      success: true,
-      token,
-      message: "Welcome back to RetailFlow!",
-      data: sanitizeShop(shop),
-    });
+    return res.status(200).json({ success: true, token, message: "Welcome back to RetailFlow!", data: sanitizeShop(shop) });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    console.error("OTP Verification Error:", error.message);
+    return res.status(500).json({ success: false, message: "Unable to verify OTP right now." });
   }
 };
 
