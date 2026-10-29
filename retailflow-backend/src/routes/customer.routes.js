@@ -7,19 +7,19 @@ import {
   scheduleReminder,
   getRemindersDue,
 } from "../controllers/customer.controller.js";
-import { protect } from "../middlewares/auth.middleware.js";
+import { protect, authorizePermission } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
 router.use(protect);
 
-router.get("/reminders-due", getRemindersDue);
+router.get("/reminders-due", authorizePermission("canAccessKhata"), getRemindersDue);
 
 router.route("/").get(getCustomers).post(addCustomer);
 
-router.route("/:id").put(updateCustomer);
+router.route("/:id").put(authorizePermission("canAccessKhata"), updateCustomer);
 
-router.get("/:id/history", getCustomerHistory);
-router.post("/:id/schedule-reminder", scheduleReminder);
+router.get("/:id/history", authorizePermission("canAccessKhata"), getCustomerHistory);
+router.post("/:id/schedule-reminder", authorizePermission("canAccessKhata"), scheduleReminder);
 
 export default router;
