@@ -230,39 +230,32 @@ export const staffLogin = async (req, res) => {
 
 export const forgotPassword = async (req, res) => {
   try {
-    const { email } = req.body;
-    if (!email)
-      return res
-        .status(400)
-        .json({ success: false, message: "Email is required." });
+    const email = String(req.body.email || "").trim().toLowerCase();
+    if (!email) return res.status(400).json({ success: false, message: "A valid email address is required." });
 
-    const shop = await Shop.findOne({ email });
-    if (!shop)
-      return res
-        .status(404)
-        .json({ success: false, message: "No account found with this email." });
+    const shop = await Shop.findOne({ email }).select("+otp +otpExpires +otpPurpose +otpAttempts");
+    // Avoid disclosing whether an email has an account.
+    if (!shop) return res.status(200).json({ success: true, message: "If the account exists, a password-reset OTP will be sent." });
 
     const rawOtp = generateOtp();
-
     shop.otp = hashOtp(rawOtp);
-    shop.otpExpires = Date.now() + 10 * 60 * 1000;
+    shop.otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+    shop.otpPurpose = "reset";
+    shop.otpAttempts = 0;
     await shop.save();
 
-    res
-      .status(200)
-      .json({ success: true, message: "Password reset OTP sent." });
-
-    sendEmail(
-      shop.email,
-      "RetailFlow - Password Reset OTP",
-      otpHtml(
-        rawOtp,
-        "Reset Your Password",
-        "You requested a password reset. Your OTP is:",
-      ),
-    ).catch((err) => console.error("Reset email failed:", err.message));
+    try {
+      await sendEmail(shop.email, "RetailFlow - Password Reset OTP", otpHtml(rawOtp, "Reset Your Password", "You requested a password reset. Your OTP is:"));
+    } catch (emailError) {
+      shop.otp = null; shop.otpExpires = null; shop.otpPurpose = null; shop.otpAttempts = 0;
+      await shop.save();
+      console.error("Reset OTP delivery failed:", emailError.message);
+      return res.status(502).json({ success: false, message: "Unable to send the reset OTP right now. Please try again later." });
+    }
+    return res.status(200).json({ success: true, message: "If the account exists, a password-reset OTP will be sent." });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    console.error("Forgot Password Error:", error.message);
+    return res.status(500).json({ success: false, message: "Unable to start password reset right now." });
   }
 };
 
