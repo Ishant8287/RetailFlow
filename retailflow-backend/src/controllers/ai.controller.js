@@ -6,17 +6,22 @@ export const getGeminiInsights = async (req, res) => {
   try {
     const { prompt } = req.body;
 
-    if (!prompt) {
+    if (typeof prompt !== "string" || !prompt.trim() || prompt.length > 8000) {
       return res.status(400).json({
         success: false,
-        message: "Prompt is required",
+        message: "Prompt must be a non-empty string of at most 8000 characters.",
       });
     }
 
-    const shopId = req.shop?.id || "default";
-    const cacheKey = `${shopId}_${prompt}`;
+    const shopId = req.shop.id;
+    const normalizedPrompt = prompt.trim();
+    const cacheKey = `${shopId}_${normalizedPrompt}`;
 
-    //Cache check
+    // Remove expired entries and cap cache size to avoid unbounded process memory growth.
+    for (const [key, entry] of insightCache.entries()) {
+      if (Date.now() - entry.time >= 10 * 60 * 1000) insightCache.delete(key);
+    }
+
     const cached = insightCache.get(cacheKey);
     if (cached && Date.now() - cached.time < 10 * 60 * 1000) {
       return res.status(200).json({
@@ -37,7 +42,7 @@ export const getGeminiInsights = async (req, res) => {
         },
         {
           role: "user",
-          content: prompt,
+          content: normalizedPrompt,
         },
       ],
     max_completion_tokens: 1024,
@@ -54,7 +59,11 @@ export const getGeminiInsights = async (req, res) => {
       throw new Error("No response from AI");
     }
 
-    //Save in cache
+    // Bound this process-local cache.
+    if (insightCache.size >= 500) {
+      const oldestKey = insightCache.keys().next().value;
+      if (oldestKey !== undefined) insightCache.delete(oldestKey);
+    }
     insightCache.set(cacheKey, {
       text: responseText,
       time: Date.now(),
@@ -74,9 +83,14 @@ export const getGeminiInsights = async (req, res) => {
       });
     }
 
+    console.error("AI generation failed:", {
+      status: error?.status,
+      code: error?.code,
+      message: error?.message,
+    });
     return res.status(500).json({
       success: false,
-      message: error.message || "Internal Server Error",
+      message: "Unable to generate AI insight right now. Please try again later.",
     });
   }
 };
