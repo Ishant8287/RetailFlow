@@ -382,17 +382,28 @@ export const changePassword = async (req, res) => {
 
 export const getMe = async (req, res) => {
   try {
+    // Staff tokens must never receive the owner profile or bank details.
+    if (req.staff) {
+      return res.status(200).json({
+        success: true,
+        data: {
+          _id: req.staff._id,
+          name: req.staff.name,
+          phone: req.staff.phone,
+          role: req.staff.role,
+          shopId: req.shop.id,
+          permissions: req.staff.permissions,
+        },
+      });
+    }
     const shop = await Shop.findById(req.shop.id).lean();
-    if (!shop)
-      return res
-        .status(404)
-        .json({ success: false, message: "Shop not found." });
+    if (!shop) return res.status(404).json({ success: false, message: "Shop not found." });
     return res.status(200).json({ success: true, data: sanitizeShop(shop) });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    console.error("Get profile error:", error.message);
+    return res.status(500).json({ success: false, message: "Unable to load profile." });
   }
 };
-
 export const updateProfile = async (req, res) => {
   try {
     const allowedFields = [
