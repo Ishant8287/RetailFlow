@@ -45,14 +45,17 @@ const generateOtp = () => crypto.randomInt(100000, 1000000).toString();
 
 export const register = async (req, res) => {
   try {
-    const { ownerName, shopName, password, phone } = req.body;
-    const email = String(req.body.email || "").trim().toLowerCase();
-    if (!String(ownerName || "").trim() || !String(shopName || "").trim() || !email || typeof password !== "string" || password.length < 6 || !String(phone || "").trim()) {
-      return res.status(400).json({ success: false, message: "All fields are required and password must be at least 6 characters." });
+    const { ownerName, shopName, password, phone } = req.body || {};
+    const normalizedOwnerName = typeof ownerName === "string" ? ownerName.trim() : "";
+    const normalizedShopName = typeof shopName === "string" ? shopName.trim() : "";
+    const email = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
+    const normalizedPhone = String(phone || "").trim();
+    if (!normalizedOwnerName || !normalizedShopName || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email) || typeof password !== "string" || password.length < 6 || !normalizedPhone) {
+      return res.status(400).json({ success: false, message: "Valid name, shop name, email, phone, and a password of at least 6 characters are required." });
     }
     const shopExists = await Shop.findOne({ email }).lean();
     if (shopExists) return res.status(409).json({ success: false, message: "An account with this email already exists." });
-    const shop = await Shop.create({ ownerName: ownerName.trim(), shopName: shopName.trim(), email, password, phone: String(phone).trim() });
+    const shop = await Shop.create({ ownerName: normalizedOwnerName, shopName: normalizedShopName, email, password, phone: normalizedPhone });
     return res.status(201).json({
       success: true,
       message: "RetailFlow account created successfully! Please login.",
